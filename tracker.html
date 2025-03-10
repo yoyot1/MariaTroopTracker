@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Troop Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .input-group {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+        }
+        input {
+            padding: 8px;
+            font-size: 16px;
+            flex-grow: 1;
+        }
+        button {
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+        .unit {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 10px 0;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+        .unit-name {
+            flex-grow: 1;
+        }
+        .count {
+            margin: 0 10px;
+            min-width: 40px;
+            text-align: center;
+        }
+        .nation-section {
+            margin: 30px 0;
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        /* Nation-specific styling */
+        .nation-france {
+            border-color: #d42f2f;
+            background-color: rgba(212, 47, 47, 0.05);
+        }
+        .nation-austria {
+            border-color: #000000;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .nation-prussia {
+            border-color: #4a90e2;
+            background-color: rgba(74, 144, 226, 0.05);
+        }
+        .nation-bavaria {
+            border-color: #e3a012;
+            background-color: rgba(227, 160, 18, 0.05);
+        }
+        .nation-pragmatic {
+            border-color: #444444;
+            background-color: rgba(68, 68, 68, 0.05);
+        }
+        .nation-saxony {
+            border-color: #50c878;
+            background-color: rgba(80, 200, 120, 0.05);
+        }
+        .nation-header {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .troop-total {
+            margin: 5px 0 15px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #666;
+        }
+        .troop-total-number {
+            font-weight: bold;
+            color: #333;
+        }
+        .nation-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nation-icon {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            border-radius: 50%;
+            border: 1px solid black;
+        }
+        .back-button {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: #666;
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .back-button:hover {
+            background: #f0f0f0;
+        }
+        .nations-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .saxony-control, .add-saxony {
+            padding: 5px 10px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .saxony-control {
+            background: #dc3545;
+        }
+        .add-saxony {
+            background: #28a745;
+        }
+        .saxony-control:disabled, .add-saxony:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        .modal-content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        .modal-buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .modal-confirm {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .modal-cancel {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .general {
+            display: grid;
+            grid-template-columns: 1fr 180px;
+            align-items: center;
+            padding: 10px;
+            margin: 10px 0;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+        .general.eliminated .general-name {
+            opacity: 0.5;
+        }
+        .general-name {
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            transition: opacity 0.3s;
+        }
+        .general-name span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .rank-number {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            background: #666;
+            color: white;
+            border-radius: 50%;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .troop-controls {
+            display: grid;
+            grid-template-columns: auto 50px auto auto;
+            align-items: center;
+            gap: 10px;
+            justify-content: end;
+        }
+        .troop-count {
+            text-align: center;
+            font-size: 1.2em;
+        }
+        .max-troops {
+            color: #666;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+        .winter-scoring {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .winter-scoring h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .winter-years-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .year-button {
+            padding: 8px 16px;
+            background: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            min-width: 120px;
+        }
+        .year-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .year-button.completed {
+            background: #198754;
+            color: white;
+            border-color: #198754;
+        }
+        .year-button.active {
+            background: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+        .winter-year {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .winter-year h3 {
+            margin: 0 0 15px 0;
+            color: #495057;
+        }
+        .winter-scores {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .score-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .score-input label {
+            font-weight: 500;
+            color: #495057;
+            flex: 1;
+        }
+        .score-input input {
+            width: 60px;
+            padding: 5px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .score-input input:disabled {
+            background: #e9ecef;
+            cursor: not-allowed;
+        }
+        .score-input input:invalid {
+            border-color: #dc3545;
+            background-color: #fff8f8;
+        }
+        .score-input input:invalid:focus {
+            outline-color: #dc3545;
+        }
+        .record-button {
+            margin-top: 15px;
+            padding: 8px 16px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .record-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .recorded-message {
+            margin-top: 10px;
+            color: #28a745;
+            font-style: italic;
+        }
+        .view-final-scores {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">← Back to Nation Selection</a>
+    <h1>Troop Tracker</h1>
+    
+    <div id="nationsContainer" class="nations-container"></div>
+
+    <div class="winter-scoring">
+        <h2>Winter Scoring</h2>
+        <div class="winter-years-buttons" id="winterYearButtons">
+            <button class="year-button" onclick="selectYear(1741)" id="yearBtn_1741">Winter 1741</button>
+            <button class="year-button" onclick="selectYear(1742)" id="yearBtn_1742" disabled>Winter 1742</button>
+            <button class="year-button" onclick="selectYear(1743)" id="yearBtn_1743" disabled>Winter 1743</button>
+            <button class="year-button" onclick="selectYear(1744)" id="yearBtn_1744" disabled>Winter 1744</button>
+        </div>
+        <div id="winterYears" style="display: none">
+            <div class="winter-year" id="winter1741">
+                <h3>Winter 1741</h3>
+                <div class="winter-scores">
+                    <div class="score-input">
+                        <label>France</label>
+                        <input type="number" min="1" max="11" id="score_1741_france">
+                    </div>
+                    <div class="score-input">
+                        <label>Prussia</label>
+                        <input type="number" min="1" max="13" id="score_1741_prussia">
+                    </div>
+                    <div class="score-input">
+                        <label>Austria</label>
+                        <input type="number" min="1" max="8" id="score_1741_austria">
+                    </div>
+                    <div class="score-input">
+                        <label>Pragmatic Army</label>
+                        <input type="number" min="1" max="8" id="score_1741_pragmatic">
+                    </div>
+                </div>
+                <button class="record-button" onclick="recordWinterScores(1741)">Record Scores</button>
+                <div class="recorded-message" id="recorded_1741" style="display: none;">
+                    Scores recorded and hidden
+                </div>
+            </div>
+            
+            <div class="winter-year" id="winter1742">
+                <h3>Winter 1742</h3>
+                <div class="winter-scores">
+                    <div class="score-input">
+                        <label>France</label>
+                        <input type="number" min="1" max="11" id="score_1742_france">
+                    </div>
+                    <div class="score-input">
+                        <label>Prussia</label>
+                        <input type="number" min="1" max="13" id="score_1742_prussia">
+                    </div>
+                    <div class="score-input">
+                        <label>Austria</label>
+                        <input type="number" min="1" max="8" id="score_1742_austria">
+                    </div>
+                    <div class="score-input">
+                        <label>Pragmatic Army</label>
+                        <input type="number" min="1" max="8" id="score_1742_pragmatic">
+                    </div>
+                </div>
+                <button class="record-button" onclick="recordWinterScores(1742)">Record Scores</button>
+                <div class="recorded-message" id="recorded_1742" style="display: none;">
+                    Scores recorded and hidden
+                </div>
+            </div>
+            
+            <div class="winter-year" id="winter1743">
+                <h3>Winter 1743</h3>
+                <div class="winter-scores">
+                    <div class="score-input">
+                        <label>France</label>
+                        <input type="number" min="1" max="11" id="score_1743_france">
+                    </div>
+                    <div class="score-input">
+                        <label>Prussia</label>
+                        <input type="number" min="1" max="13" id="score_1743_prussia">
+                    </div>
+                    <div class="score-input">
+                        <label>Austria</label>
+                        <input type="number" min="1" max="8" id="score_1743_austria">
+                    </div>
+                    <div class="score-input">
+                        <label>Pragmatic Army</label>
+                        <input type="number" min="1" max="8" id="score_1743_pragmatic">
+                    </div>
+                </div>
+                <button class="record-button" onclick="recordWinterScores(1743)">Record Scores</button>
+                <div class="recorded-message" id="recorded_1743" style="display: none;">
+                    Scores recorded and hidden
+                </div>
+            </div>
+            
+            <div class="winter-year" id="winter1744">
+                <h3>Winter 1744</h3>
+                <div class="winter-scores">
+                    <div class="score-input">
+                        <label>France</label>
+                        <input type="number" min="1" max="11" id="score_1744_france">
+                    </div>
+                    <div class="score-input">
+                        <label>Prussia</label>
+                        <input type="number" min="1" max="13" id="score_1744_prussia">
+                    </div>
+                    <div class="score-input">
+                        <label>Austria</label>
+                        <input type="number" min="1" max="8" id="score_1744_austria">
+                    </div>
+                    <div class="score-input">
+                        <label>Pragmatic Army</label>
+                        <input type="number" min="1" max="8" id="score_1744_pragmatic">
+                    </div>
+                </div>
+                <button class="record-button" onclick="recordWinterScores(1744)">Record Scores</button>
+                <div class="recorded-message" id="recorded_1744" style="display: none;">
+                    Scores recorded and hidden
+                </div>
+            </div>
+        </div>
+        <button class="view-final-scores" onclick="viewFinalScores()" id="viewScoresButton">View Final Scores</button>
+    </div>
+
+    <!-- Add modal dialog -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle"></h3>
+            <p id="modalMessage"></p>
+            <div class="modal-buttons">
+                <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+                <button id="modalConfirm" class="modal-confirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get the nation from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const mainNation = urlParams.get('nation');
+
+        if (!mainNation) {
+            window.location.href = 'index.html';
+        }
+
+        // Function to get the correct image name for each nation
+        function getNationImageName(nation) {
+            const imageMap = {
+                'Pragmatic Army': 'pragmatic',
+                'Bavaria': 'bavaria'
+            };
+            return imageMap[nation] || nation.toLowerCase();
+        }
+
+        // Define related nations for each main selection
+        const nationGroups = {
+            'france': ['France', 'Bavaria'],
+            'austria': ['Austria'],
+            'prussia': ['Prussia', 'Pragmatic Army', 'Saxony']
+        };
+
+        // Track if Saxony has switched sides
+        let saxonySwitched = localStorage.getItem('saxonySwitched') === 'true';
+
+        // Define generals for each nation with their ranks
+        const nationGenerals = {
+            'France': [
+                { name: 'Moritz v. Sachsen', rank: 1, troops: 7 },
+                { name: 'Belle-Isle', rank: 2, troops: 6 },
+                { name: 'Broglie', rank: 3, troops: 5 },
+                { name: 'Maillebois', rank: 4 },
+                { name: 'Noailles', rank: 5 }
+            ],
+            'Bavaria': [
+                { name: 'Törring', rank: 1, troops: 5 }
+            ],
+            'Austria': [
+                { name: 'Karl v. Lothringen', rank: 1 },
+                { name: 'Traun', rank: 2 },
+                { name: 'Khevenhüller', rank: 3, troops: 6 },
+                { name: 'Batthyány', rank: 4, troops: 2 },
+                { name: 'Neipperg', rank: 5 },
+                { name: 'Arenberg', rank: 6, troops: 4 }
+            ],
+            'Prussia': [
+                { name: 'Friedrich der Große', rank: 1 },
+                { name: 'Schwerin', rank: 2 },
+                { name: 'Erbprinz Leopold', rank: 3, troops: 4 },
+                { name: 'Der Alte Dessauer', rank: 4, troops: 6 }
+            ],
+            'Pragmatic Army': [
+                { name: 'George II', rank: 1 },
+                { name: 'Cumberland', rank: 2 },
+                { name: 'Earl of Stair', rank: 3 }
+            ],
+            'Saxony': [
+                { name: 'Rutowski', rank: 1, troops: 5 }
+            ]
+        };
+
+        const MAX_TROOPS = 8;
+
+        // Store generals and their troop counts
+        let generalsData = JSON.parse(localStorage.getItem('generalsData'));
+        
+        // If no saved data, initialize with starting values from nationGenerals
+        if (!generalsData) {
+            generalsData = {};
+            Object.entries(nationGenerals).forEach(([nation, generals]) => {
+                generalsData[nation] = {};
+                generals.forEach(general => {
+                    if (general.troops) {
+                        generalsData[nation][general.name] = general.troops;
+                    }
+                });
+            });
+        }
+
+        // Initialize the page
+        function initializePage() {
+            const nationsContainer = document.getElementById('nationsContainer');
+            const nations = nationGroups[mainNation];
+            
+            const shouldShowAddButton = 
+                (mainNation === 'prussia' && saxonySwitched) || 
+                (mainNation === 'austria' && !saxonySwitched);
+
+            nations.forEach(nation => {
+                if (nation === 'Saxony' && saxonySwitched && mainNation === 'prussia') {
+                    return;
+                }
+
+                const nationSection = document.createElement('div');
+                nationSection.className = 'nation-section nation-' + getNationImageName(nation);
+                
+                const headerContent = `
+                    <h2 class="nation-header" id="nation-header-${nation}">
+                        <div class="nation-title">
+                            <img src="images/role_${getNationImageName(nation)}.2x.png" alt="${nation}" class="nation-icon">
+                            ${nation}
+                        </div>
+                        ${(nation === 'Austria' || nation === 'Prussia') && shouldShowAddButton ? 
+                            `<button class="add-saxony" onclick="addSaxonyToNation('${nation}')">
+                                Add Saxony
+                            </button>` : ''}
+                        ${nation === 'Saxony' ? 
+                            `<button class="saxony-control" onclick="removeSaxony()">
+                                Remove Saxony
+                            </button>` : ''}
+                    </h2>
+                    <div class="troop-total">Total Troops: <span class="troop-total-number" id="total_${nation}">0</span></div>
+                `;
+
+                const generalsContent = `
+                    <div id="generalsList_${nation}">
+                        ${(nationGenerals[nation] || []).map(general => `
+                            <div class="general ${(!general.troops || general.troops === 0) ? 'eliminated' : ''}" data-general="${general.name}">
+                                <span class="general-name">
+                                    <span class="rank-number">${general.rank}</span>
+                                    ${general.name}
+                                </span>
+                                <div class="troop-controls">
+                                    <button onclick="updateTroops('${nation}', '${general.name}', -1)">-</button>
+                                    <span class="troop-count">${general.troops || 0}</span>
+                                    <button onclick="updateTroops('${nation}', '${general.name}', 1)">+</button>
+                                    <span class="max-troops">/ ${MAX_TROOPS}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                nationSection.innerHTML = headerContent + generalsContent;
+                nationsContainer.appendChild(nationSection);
+
+                if (generalsData[nation]) {
+                    Object.entries(generalsData[nation]).forEach(([general, troops]) => {
+                        updateTroopDisplay(nation, general, troops);
+                    });
+                }
+            });
+
+            if (mainNation === 'austria' && saxonySwitched) {
+                const saxonySection = document.createElement('div');
+                saxonySection.className = 'nation-section nation-saxony';
+                
+                const headerContent = `
+                    <h2 class="nation-header">
+                        <div class="nation-title">
+                            <img src="images/role_saxony.2x.png" alt="Saxony" class="nation-icon">
+                            Saxony
+                        </div>
+                        <button class="saxony-control" onclick="removeSaxony()">Remove Saxony</button>
+                    </h2>
+                `;
+
+                const generalsContent = `
+                    <div id="generalsList_Saxony">
+                        ${nationGenerals['Saxony'].map(general => `
+                            <div class="general ${(!general.troops || general.troops === 0) ? 'eliminated' : ''}" data-general="${general.name}">
+                                <span class="general-name">
+                                    <span class="rank-number">${general.rank}</span>
+                                    ${general.name}
+                                </span>
+                                <div class="troop-controls">
+                                    <button onclick="updateTroops('Saxony', '${general.name}', -1)">-</button>
+                                    <span class="troop-count">${general.troops || 0}</span>
+                                    <button onclick="updateTroops('Saxony', '${general.name}', 1)">+</button>
+                                    <span class="max-troops">/ ${MAX_TROOPS}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                saxonySection.innerHTML = headerContent + generalsContent;
+                nationsContainer.appendChild(saxonySection);
+
+                if (generalsData['Saxony']) {
+                    Object.entries(generalsData['Saxony']).forEach(([general, troops]) => {
+                        updateTroopDisplay('Saxony', general, troops);
+                    });
+                }
+            }
+        }
+
+        function updateTroops(nation, general, change) {
+            const generalElement = document.querySelector(`#generalsList_${nation} .general[data-general="${general}"]`);
+            const countElement = generalElement.querySelector('.troop-count');
+            const currentCount = parseInt(countElement.textContent);
+            const newCount = Math.max(0, Math.min(MAX_TROOPS, currentCount + change));
+            
+            updateTroopDisplay(nation, general, newCount);
+            saveGeneralsData();
+        }
+
+        function updateTroopDisplay(nation, general, count) {
+            const generalElement = document.querySelector(`#generalsList_${nation} .general[data-general="${general}"]`);
+            const countElement = generalElement.querySelector('.troop-count');
+            
+            countElement.textContent = count;
+            
+            // Update eliminated status
+            if (count === 0) {
+                generalElement.classList.add('eliminated');
+            } else {
+                generalElement.classList.remove('eliminated');
+            }
+
+            // Store the data
+            if (!generalsData[nation]) {
+                generalsData[nation] = {};
+            }
+            generalsData[nation][general] = count;
+
+            // Update the nation's total
+            updateNationTotal(nation);
+        }
+
+        function updateNationTotal(nation) {
+            const totalElement = document.getElementById(`total_${nation}`);
+            if (totalElement) {
+                const total = Object.values(generalsData[nation] || {}).reduce((sum, count) => sum + count, 0);
+                totalElement.textContent = total;
+            }
+        }
+
+        function saveGeneralsData() {
+            localStorage.setItem('generalsData', JSON.stringify(generalsData));
+        }
+
+        function showModal(title, message, onConfirm) {
+            const modal = document.getElementById('confirmModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const confirmButton = document.getElementById('modalConfirm');
+
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modal.style.display = 'block';
+
+            confirmButton.onclick = () => {
+                onConfirm();
+                closeModal();
+            };
+        }
+
+        function closeModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+        }
+
+        function removeSaxony() {
+            const message = mainNation === 'prussia' ? 
+                'Are you sure you want to remove Saxony? It will become available to Austria.' :
+                'Are you sure you want to remove Saxony? It will return to Prussia.';
+            
+            showModal(
+                'Remove Saxony',
+                message,
+                () => {
+                    saxonySwitched = mainNation === 'prussia';
+                    localStorage.setItem('saxonySwitched', saxonySwitched);
+                    window.location.reload();
+                }
+            );
+        }
+
+        function addSaxonyToNation(nation) {
+            showModal(
+                'Add Saxony',
+                `Add Saxony to ${nation}?`,
+                () => {
+                    saxonySwitched = nation === 'Austria';
+                    localStorage.setItem('saxonySwitched', saxonySwitched);
+                    window.location.reload();
+                }
+            );
+        }
+
+        // Initialize the page when loaded
+        initializePage();
+
+        // After initialization, update all nation totals
+        Object.keys(nationGroups[mainNation]).forEach(nation => {
+            updateNationTotal(nation);
+        });
+
+        // Close modal if clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('confirmModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Winter scoring functionality
+        function initializeWinterScoring() {
+            const winterScores = JSON.parse(localStorage.getItem('winterScores') || '{}');
+            const years = [1741, 1742, 1743, 1744];
+            
+            // Update button states based on recorded scores
+            years.forEach((year, index) => {
+                const button = document.getElementById(`yearBtn_${year}`);
+                if (winterScores[year]) {
+                    button.classList.add('completed');
+                    button.disabled = true;
+                    
+                    // Enable next year's button if available
+                    if (index < years.length - 1) {
+                        const nextButton = document.getElementById(`yearBtn_${years[index + 1]}`);
+                        nextButton.disabled = false;
+                    }
+                }
+            });
+
+            // Show view scores button if all years are recorded
+            const allYearsRecorded = years.every(year => winterScores[year]);
+            const viewScoresButton = document.getElementById('viewScoresButton');
+            if (viewScoresButton && allYearsRecorded) {
+                viewScoresButton.style.display = 'block';
+            }
+
+            // Hide all year divs initially
+            document.getElementById('winterYears').style.display = 'none';
+            years.forEach(year => {
+                const yearDiv = document.getElementById(`winter${year}`);
+                if (yearDiv) yearDiv.style.display = 'none';
+            });
+        }
+
+        function selectYear(year) {
+            // Hide all year divs
+            const years = [1741, 1742, 1743, 1744];
+            years.forEach(y => {
+                const yearDiv = document.getElementById(`winter${y}`);
+                if (yearDiv) yearDiv.style.display = 'none';
+            });
+
+            // Show selected year div
+            const selectedYearDiv = document.getElementById(`winter${year}`);
+            if (selectedYearDiv) {
+                document.getElementById('winterYears').style.display = 'block';
+                selectedYearDiv.style.display = 'block';
+            }
+
+            // Update button states
+            years.forEach(y => {
+                const button = document.getElementById(`yearBtn_${y}`);
+                if (button) {
+                    button.classList.remove('active');
+                    if (y === year) {
+                        button.classList.add('active');
+                    }
+                }
+            });
+        }
+
+        function recordWinterScores(year) {
+            const nations = ['france', 'prussia', 'austria', 'pragmatic'];
+            const scores = {};
+            
+            // Define score limits for each nation
+            const scoreLimits = {
+                france: 11,
+                prussia: 13,
+                austria: 8,
+                pragmatic: 8
+            };
+            
+            // Validate all scores are entered and within limits
+            let allScoresValid = true;
+            let errorMessage = '';
+            
+            nations.forEach(nation => {
+                const scoreInput = document.getElementById(`score_${year}_${nation}`);
+                const score = scoreInput.value;
+                
+                if (!score) {
+                    allScoresValid = false;
+                    errorMessage = 'Please enter scores for all nations';
+                    return;
+                }
+                
+                const numScore = parseInt(score);
+                if (numScore < 1 || numScore > scoreLimits[nation]) {
+                    allScoresValid = false;
+                    const nationName = nation.charAt(0).toUpperCase() + nation.slice(1);
+                    const displayName = nationName === 'Pragmatic' ? 'Pragmatic Army' : nationName;
+                    errorMessage = `${displayName} score must be between 1 and ${scoreLimits[nation]} (a score of 0 means the game is already over)`;
+                    return;
+                }
+                
+                scores[nation] = numScore;
+            });
+
+            if (!allScoresValid) {
+                alert(errorMessage);
+                return;
+            }
+
+            // Store scores
+            const winterScores = JSON.parse(localStorage.getItem('winterScores') || '{}');
+            winterScores[year] = scores;
+            localStorage.setItem('winterScores', JSON.stringify(winterScores));
+
+            // Update button states
+            const currentButton = document.getElementById(`yearBtn_${year}`);
+            currentButton.classList.remove('active');
+            currentButton.classList.add('completed');
+            currentButton.disabled = true;
+
+            // Enable next year's button if available
+            const years = [1741, 1742, 1743, 1744];
+            const currentIndex = years.indexOf(year);
+            if (currentIndex < years.length - 1) {
+                const nextButton = document.getElementById(`yearBtn_${years[currentIndex + 1]}`);
+                nextButton.disabled = false;
+            }
+
+            // Hide the scoring interface
+            document.getElementById('winterYears').style.display = 'none';
+
+            // Check if all years are recorded
+            const allYearsRecorded = years.every(y => winterScores[y]);
+            if (allYearsRecorded) {
+                document.getElementById('viewScoresButton').style.display = 'block';
+            }
+        }
+
+        function viewFinalScores() {
+            const winterScores = JSON.parse(localStorage.getItem('winterScores') || '{}');
+            const years = [1741, 1742, 1743, 1744];
+            const nations = ['france', 'prussia', 'austria', 'pragmatic'];
+            
+            // Calculate totals
+            const totals = {};
+            nations.forEach(nation => {
+                totals[nation] = years.reduce((sum, year) => sum + (winterScores[year]?.[nation] || 0), 0);
+            });
+
+            // Create message with year-by-year breakdown and totals
+            let message = 'Winter Scores by Year:\n\n';
+            
+            years.forEach(year => {
+                message += `${year}:\n`;
+                nations.forEach(nation => {
+                    const nationName = nation.charAt(0).toUpperCase() + nation.slice(1);
+                    const displayName = nationName === 'Pragmatic' ? 'Pragmatic Army' : nationName;
+                    message += `${displayName}: ${winterScores[year][nation]}\n`;
+                });
+                message += '\n';
+            });
+
+            message += 'Final Totals:\n';
+            nations.forEach(nation => {
+                const nationName = nation.charAt(0).toUpperCase() + nation.slice(1);
+                const displayName = nationName === 'Pragmatic' ? 'Pragmatic Army' : nationName;
+                message += `${displayName}: ${totals[nation]}\n`;
+            });
+
+            alert(message);
+        }
+
+        // Initialize winter scoring after page load
+        document.addEventListener('DOMContentLoaded', initializeWinterScoring);
+    </script>
+</body>
+</html> 
