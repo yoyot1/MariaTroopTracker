@@ -31,6 +31,38 @@ body {
     box-sizing: border-box;
 }
 
+/* Modified state borders for each nation */
+.nation-button[onclick*="france"].modified {
+    border: 4px solid #d42f2f;
+    box-shadow: 0 2px 4px rgba(212, 47, 47, 0.2);
+}
+
+.nation-button[onclick*="austria"].modified {
+    border: 4px solid #444444;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.nation-button[onclick*="prussia"].modified {
+    border: 4px solid #4a90e2;
+    box-shadow: 0 2px 4px rgba(74, 144, 226, 0.2);
+}
+
+/* Update hover states for modified buttons */
+.nation-button[onclick*="france"].modified:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(212, 47, 47, 0.3);
+}
+
+.nation-button[onclick*="austria"].modified:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.nation-button[onclick*="prussia"].modified:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(74, 144, 226, 0.3);
+}
+
 /* Single-nation button styling */
 .nation-button[onclick*="france"], .nation-button[onclick*="austria"] {
     position: relative;

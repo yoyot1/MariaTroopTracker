@@ -52,6 +52,97 @@
             window.location.href = `tracker.html?nation=${nation}`;
         }
 
+        function checkNationModifications() {
+            // Get saved data
+            const generalsData = JSON.parse(localStorage.getItem('generalsData') || '{}');
+            const saxonySwitched = localStorage.getItem('saxonySwitched') === 'true';
+            const saxonyModifier = localStorage.getItem('saxonyModifier'); // Which nation made the change
+            
+            // Check France modifications
+            const franceButton = document.querySelector('.nation-button[onclick*="france"]');
+            if (hasNationModifications('France', generalsData)) {
+                franceButton.classList.add('modified');
+            } else {
+                franceButton.classList.remove('modified');
+            }
+            
+            // Check Austria modifications
+            const austriaButton = document.querySelector('.nation-button[onclick*="austria"]');
+            if (hasNationModifications('Austria', generalsData) || 
+                (saxonyModifier === 'Austria' || saxonyModifier === 'austria')) {
+                austriaButton.classList.add('modified');
+            } else {
+                austriaButton.classList.remove('modified');
+            }
+            
+            // Check Prussia/Pragmatic modifications
+            const prussiaButton = document.querySelector('.nation-button[onclick*="prussia"]');
+            if (hasNationModifications('Prussia', generalsData) || 
+                hasNationModifications('Pragmatic Army', generalsData) ||
+                (saxonyModifier === 'Prussia' || saxonyModifier === 'prussia')) {
+                prussiaButton.classList.add('modified');
+            } else {
+                prussiaButton.classList.remove('modified');
+            }
+        }
+
+        function hasNationModifications(nation, generalsData) {
+            if (!generalsData[nation]) return false;
+            
+            // Get original troop values
+            const originalTroops = {};
+            (nationGenerals[nation] || []).forEach(general => {
+                if (general.troops) {
+                    originalTroops[general.name] = general.troops;
+                }
+            });
+            
+            // Compare current values with original values
+            for (const [general, troops] of Object.entries(generalsData[nation])) {
+                if (originalTroops[general] !== troops) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        // Define starting troop values for each nation's generals
+        const nationGenerals = {
+            'France': [
+                { name: 'Moritz v. Sachsen', rank: 1, troops: 7 },
+                { name: 'Belle-Isle', rank: 2, troops: 6 },
+                { name: 'Broglie', rank: 3, troops: 5 },
+                { name: 'Maillebois', rank: 4 },
+                { name: 'Noailles', rank: 5 }
+            ],
+            'Bavaria': [
+                { name: 'Törring', rank: 1, troops: 5 }
+            ],
+            'Austria': [
+                { name: 'Karl v. Lothringen', rank: 1 },
+                { name: 'Traun', rank: 2 },
+                { name: 'Khevenhüller', rank: 3, troops: 6 },
+                { name: 'Batthyány', rank: 4, troops: 2 },
+                { name: 'Neipperg', rank: 5 },
+                { name: 'Arenberg', rank: 6, troops: 4 }
+            ],
+            'Prussia': [
+                { name: 'Friedrich der Große', rank: 1 },
+                { name: 'Schwerin', rank: 2 },
+                { name: 'Erbprinz Leopold', rank: 3, troops: 4 },
+                { name: 'Der Alte Dessauer', rank: 4, troops: 6 }
+            ],
+            'Pragmatic Army': [
+                { name: 'George II', rank: 1 },
+                { name: 'Cumberland', rank: 2 },
+                { name: 'Earl of Stair', rank: 3 }
+            ],
+            'Saxony': [
+                { name: 'Rutowski', rank: 1, troops: 5 }
+            ]
+        };
+
         function showResetConfirmation() {
             document.getElementById('confirmModal').style.display = 'block';
         }
@@ -65,6 +156,8 @@
             closeModal();
             // Show feedback to user
             alert('All troops have been reset to their starting values!');
+            // Update button states after reset
+            checkNationModifications();
         }
 
         // Close modal if clicking outside
@@ -73,6 +166,41 @@
             if (event.target === modal) {
                 closeModal();
             }
+        }
+
+        // Check for modifications when the page loads
+        document.addEventListener('DOMContentLoaded', checkNationModifications);
+
+        function removeSaxony() {
+            const message = mainNation === 'prussia' ? 
+                'Are you sure you want to remove Saxony? It will become available to Austria.' :
+                'Are you sure you want to remove Saxony? It will return to Prussia.';
+            
+            showModal(
+                'Remove Saxony',
+                message,
+                () => {
+                    saxonySwitched = mainNation === 'prussia';
+                    localStorage.setItem('saxonySwitched', saxonySwitched);
+                    // Store which nation made the change
+                    localStorage.setItem('saxonyModifier', mainNation);
+                    window.location.reload();
+                }
+            );
+        }
+
+        function addSaxonyToNation(nation) {
+            showModal(
+                'Add Saxony',
+                `Add Saxony to ${nation}?`,
+                () => {
+                    saxonySwitched = nation === 'Austria';
+                    localStorage.setItem('saxonySwitched', saxonySwitched);
+                    // Store which nation made the change
+                    localStorage.setItem('saxonyModifier', nation.toLowerCase());
+                    window.location.reload();
+                }
+            );
         }
     </script>
 </body>

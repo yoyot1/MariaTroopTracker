@@ -406,8 +406,9 @@
                 'Remove Saxony',
                 message,
                 () => {
-                    saxonySwitched = mainNation === 'prussia';
-                    localStorage.setItem('saxonySwitched', saxonySwitched);
+                    const isFromPrussia = mainNation === 'prussia';
+                    localStorage.setItem('saxonySwitched', isFromPrussia);
+                    localStorage.setItem('saxonyModifier', isFromPrussia ? 'Prussia' : 'Austria');
                     window.location.reload();
                 }
             );
@@ -418,8 +419,8 @@
                 'Add Saxony',
                 `Add Saxony to ${nation}?`,
                 () => {
-                    saxonySwitched = nation === 'Austria';
-                    localStorage.setItem('saxonySwitched', saxonySwitched);
+                    localStorage.setItem('saxonySwitched', nation === 'Austria');
+                    localStorage.setItem('saxonyModifier', nation);
                     window.location.reload();
                 }
             );
