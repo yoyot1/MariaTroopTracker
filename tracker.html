@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Troop Tracker</title>
+    <title>Maria Troop Tracker</title>
+    <link rel="icon" type="image/jpeg" href="images/maria-thumbnail.jpg">
     <link rel="stylesheet" href="styles/tracker.css">
 </head>
 <body>
@@ -585,27 +586,116 @@
                 totals[nation] = years.reduce((sum, year) => sum + (winterScores[year]?.[nation] || 0), 0);
             });
 
-            // Create message with year-by-year breakdown and totals
-            let message = 'Winter Scores by Year:\n\n';
-            
-            years.forEach(year => {
-                message += `${year}:\n`;
-                nations.forEach(nation => {
-                    const nationName = nation.charAt(0).toUpperCase() + nation.slice(1);
-                    const displayName = nationName === 'Pragmatic' ? 'Pragmatic Army' : nationName;
-                    message += `${displayName}: ${winterScores[year][nation]}\n`;
-                });
-                message += '\n';
-            });
+            // Find the winner (lowest total)
+            const winningTotal = Math.min(...Object.values(totals));
+            const winners = Object.entries(totals)
+                .filter(([_, total]) => total === winningTotal)
+                .map(([nation, _]) => nation);
 
-            message += 'Final Totals:\n';
+            // Create table HTML
+            let tableHtml = '<div style="font-family: Arial; padding: 20px;">';
+            
+            // Add title
+            tableHtml += '<h2 style="margin-bottom: 20px;">Winter Scoring Summary</h2>';
+            
+            // Create the table
+            tableHtml += `
+                <table style="border-collapse: collapse; width: 100%; margin-bottom: 20px;">
+                    <tr style="background: #f8f9fa;">
+                        <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left;">Nation</th>
+                        ${years.map(year => 
+                            `<th style="border: 1px solid #dee2e6; padding: 12px; text-align: center;">${year}</th>`
+                        ).join('')}
+                        <th style="border: 1px solid #dee2e6; padding: 12px; text-align: center;">Total</th>
+                    </tr>
+            `;
+
+            // Add rows for each nation
             nations.forEach(nation => {
+                const isWinner = winners.includes(nation);
                 const nationName = nation.charAt(0).toUpperCase() + nation.slice(1);
                 const displayName = nationName === 'Pragmatic' ? 'Pragmatic Army' : nationName;
-                message += `${displayName}: ${totals[nation]}\n`;
+                
+                tableHtml += `
+                    <tr style="${isWinner ? 'background: #e8f5e9;' : ''}">
+                        <td style="border: 1px solid #dee2e6; padding: 12px; font-weight: ${isWinner ? 'bold' : 'normal'};">
+                            ${displayName}
+                        </td>
+                        ${years.map(year => 
+                            `<td style="border: 1px solid #dee2e6; padding: 12px; text-align: center;">
+                                ${winterScores[year]?.[nation] || '-'}
+                            </td>`
+                        ).join('')}
+                        <td style="border: 1px solid #dee2e6; padding: 12px; text-align: center; font-weight: ${isWinner ? 'bold' : 'normal'};">
+                            ${totals[nation]}
+                        </td>
+                    </tr>
+                `;
             });
 
-            alert(message);
+            tableHtml += '</table>';
+
+            // Add winner announcement
+            if (winners.length > 0) {
+                const winnerNames = winners.map(nation => {
+                    const nationName = nation.charAt(0).toUpperCase() + nation.slice(1);
+                    return nationName === 'Pragmatic' ? 'Pragmatic Army' : nationName;
+                });
+                
+                const winnerText = winners.length > 1 
+                    ? `Tie between ${winnerNames.join(' and ')}` 
+                    : `${winnerNames[0]} wins`;
+                    
+                tableHtml += `
+                    <div style="font-weight: bold; color: #2e7d32; margin-top: 10px;">
+                        ${winnerText} with ${winningTotal} points!
+                    </div>
+                `;
+            }
+
+            tableHtml += '</div>';
+
+            // Create a modal dialog for the table
+            const modalHtml = `
+                <div id="scoresModal" style="
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.5);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 1000;
+                ">
+                    <div style="
+                        background: white;
+                        padding: 20px;
+                        border-radius: 8px;
+                        max-width: 800px;
+                        width: 90%;
+                        max-height: 90vh;
+                        overflow-y: auto;
+                        position: relative;
+                    ">
+                        <button onclick="document.getElementById('scoresModal').remove()" style="
+                            position: absolute;
+                            top: 10px;
+                            right: 10px;
+                            border: none;
+                            background: none;
+                            font-size: 20px;
+                            cursor: pointer;
+                            padding: 5px 10px;
+                        ">×</button>
+                        ${tableHtml}
+                    </div>
+                </div>
+            `;
+
+            // Add the modal to the page
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
         }
 
         // Initialize winter scoring after page load
