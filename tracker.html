@@ -150,14 +150,15 @@
             window.location.href = 'index.html';
         }
 
-        // Function to get the correct image name for each nation
-        function getNationImageName(nation) {
-            const imageMap = {
-                'Pragmatic Army': 'pragmatic',
-                'Bavaria': 'bavaria'
-            };
-            return imageMap[nation] || nation.toLowerCase();
-        }
+        // Define nations with their IDs and properties
+        const nations = {
+            'France': { id: 'france', imageName: 'france' },
+            'Bavaria': { id: 'bavaria', imageName: 'bavaria' },
+            'Austria': { id: 'austria', imageName: 'austria' },
+            'Prussia': { id: 'prussia', imageName: 'prussia' },
+            'Pragmatic Army': { id: 'pragmatic', imageName: 'pragmatic' },
+            'Saxony': { id: 'saxony', imageName: 'saxony' }
+        };
 
         // Define related nations for each main selection
         const nationGroups = {
@@ -165,6 +166,16 @@
             'austria': ['Austria'],
             'prussia': ['Prussia', 'Pragmatic Army', 'Saxony']
         };
+
+        // Function to get nation ID
+        function getNationId(nation) {
+            return nations[nation]?.id || nation.toLowerCase();
+        }
+
+        // Function to get the correct image name for each nation
+        function getNationImageName(nation) {
+            return nations[nation]?.imageName || nation.toLowerCase();
+        }
 
         // Track if Saxony has switched sides
         let saxonySwitched = localStorage.getItem('saxonySwitched') === 'true';
@@ -208,40 +219,56 @@
         const MAX_TROOPS = 8;
 
         // Store generals and their troop counts
-        let generalsData = JSON.parse(localStorage.getItem('generalsData'));
+        let generalsData = JSON.parse(localStorage.getItem('generalsData')) || {};
         
-        // If no saved data, initialize with starting values from nationGenerals
-        if (!generalsData) {
-            generalsData = {};
-            Object.entries(nationGenerals).forEach(([nation, generals]) => {
+        // Initialize all nations with their generals
+        Object.entries(nationGenerals).forEach(([nation, generals]) => {
+            if (!generalsData[nation]) {
                 generalsData[nation] = {};
-                generals.forEach(general => {
-                    if (general.troops) {
-                        generalsData[nation][general.name] = general.troops;
-                    }
-                });
+            }
+            
+            generals.forEach(general => {
+                if (!(general.name in generalsData[nation])) {
+                    generalsData[nation][general.name] = general.troops || 0;
+                }
             });
-        }
+        });
+
+        // Save the initialized data
+        localStorage.setItem('generalsData', JSON.stringify(generalsData));
 
         // Initialize the page
         function initializePage() {
             const nationsContainer = document.getElementById('nationsContainer');
-            const nations = nationGroups[mainNation];
+            const nations = nationGroups[mainNation].filter(nation => {
+                // Only filter out Saxony if we're Prussia and it's switched to Austria
+                if (nation === 'Saxony') {
+                    return !(mainNation === 'prussia' && saxonySwitched);
+                }
+                return true;
+            });
             
             const shouldShowAddButton = 
                 (mainNation === 'prussia' && saxonySwitched) || 
                 (mainNation === 'austria' && !saxonySwitched);
 
-            nations.forEach(nation => {
-                if (nation === 'Saxony' && saxonySwitched && mainNation === 'prussia') {
-                    return;
-                }
+            // Add battle strength button container at the top
+            const battleStrengthContainer = document.createElement('div');
+            battleStrengthContainer.className = 'battle-strength-container';
+            battleStrengthContainer.innerHTML = `
+                <button id="viewBattleStrength" class="battle-strength-button" onclick="viewBattleStrength()" disabled>
+                    View Battle Strength
+                </button>
+            `;
+            nationsContainer.appendChild(battleStrengthContainer);
 
+            nations.forEach(nation => {
+                const nationId = getNationId(nation);
                 const nationSection = document.createElement('div');
-                nationSection.className = 'nation-section nation-' + getNationImageName(nation);
+                nationSection.className = 'nation-section nation-' + nationId;
                 
                 const headerContent = `
-                    <h2 class="nation-header" id="nation-header-${nation}">
+                    <h2 class="nation-header" id="nation-header-${nationId}">
                         <div class="nation-title">
                             <img src="images/role_${getNationImageName(nation)}.2x.png" alt="${nation}" class="nation-icon">
                             ${nation}
@@ -255,38 +282,39 @@
                                 Remove Saxony
                             </button>` : ''}
                     </h2>
-                    <div class="troop-total">Total Troops: <span class="troop-total-number" id="total_${nation}">0</span></div>
+                    <div class="troop-total">Total Troops: <span class="troop-total-number" id="total_${nationId}">0</span></div>
                 `;
 
                 const generalsContent = `
-                    <div id="generalsList_${nation}">
-                        ${(nationGenerals[nation] || []).map(general => `
-                            <div class="general ${(!general.troops || general.troops === 0) ? 'eliminated' : ''}" data-general="${general.name}">
-                                <span class="general-name">
-                                    <span class="rank-number">${general.rank}</span>
-                                    ${general.name}
-                                </span>
-                                <div class="troop-controls">
-                                    <button onclick="updateTroops('${nation}', '${general.name}', -1)">-</button>
-                                    <span class="troop-count">${general.troops || 0}</span>
-                                    <button onclick="updateTroops('${nation}', '${general.name}', 1)">+</button>
-                                    <span class="max-troops">/ ${MAX_TROOPS}</span>
+                    <div id="generalsList_${nationId}">
+                        ${(nationGenerals[nation] || []).map(general => {
+                            const currentTroops = generalsData[nation]?.[general.name] ?? 0;
+                            return `
+                                <div class="general ${currentTroops === 0 ? 'eliminated' : ''}" data-general="${general.name}" data-nation="${nation}" data-rank="${general.rank}">
+                                    <label class="general-select">
+                                        <input type="checkbox" onchange="handleGeneralSelection(this)" ${currentTroops === 0 ? 'disabled' : ''}>
+                                    </label>
+                                    <span class="general-name">
+                                        <span class="rank-number">${general.rank}</span>
+                                        ${general.name}
+                                    </span>
+                                    <div class="troop-controls">
+                                        <button onclick="updateTroops('${nation}', '${general.name}', -1)">-</button>
+                                        <span class="troop-count">${currentTroops}</span>
+                                        <button onclick="updateTroops('${nation}', '${general.name}', 1)">+</button>
+                                        <span class="max-troops">/ ${MAX_TROOPS}</span>
+                                    </div>
                                 </div>
-                            </div>
-                        `).join('')}
+                            `;
+                        }).join('')}
                     </div>
                 `;
 
                 nationSection.innerHTML = headerContent + generalsContent;
                 nationsContainer.appendChild(nationSection);
-
-                if (generalsData[nation]) {
-                    Object.entries(generalsData[nation]).forEach(([general, troops]) => {
-                        updateTroopDisplay(nation, general, troops);
-                    });
-                }
             });
 
+            // Add Saxony section if needed
             if (mainNation === 'austria' && saxonySwitched) {
                 const saxonySection = document.createElement('div');
                 saxonySection.className = 'nation-section nation-saxony';
@@ -304,46 +332,86 @@
 
                 const generalsContent = `
                     <div id="generalsList_Saxony">
-                        ${nationGenerals['Saxony'].map(general => `
-                            <div class="general ${(!general.troops || general.troops === 0) ? 'eliminated' : ''}" data-general="${general.name}">
-                                <span class="general-name">
-                                    <span class="rank-number">${general.rank}</span>
-                                    ${general.name}
-                                </span>
-                                <div class="troop-controls">
-                                    <button onclick="updateTroops('Saxony', '${general.name}', -1)">-</button>
-                                    <span class="troop-count">${general.troops || 0}</span>
-                                    <button onclick="updateTroops('Saxony', '${general.name}', 1)">+</button>
-                                    <span class="max-troops">/ ${MAX_TROOPS}</span>
+                        ${nationGenerals['Saxony'].map(general => {
+                            const currentTroops = generalsData['Saxony']?.[general.name] ?? 0;
+                            return `
+                                <div class="general ${currentTroops === 0 ? 'eliminated' : ''}" data-general="${general.name}" data-nation="Saxony" data-rank="${general.rank}">
+                                    <label class="general-select">
+                                        <input type="checkbox" onchange="handleGeneralSelection(this)" ${currentTroops === 0 ? 'disabled' : ''}>
+                                    </label>
+                                    <span class="general-name">
+                                        <span class="rank-number">${general.rank}</span>
+                                        ${general.name}
+                                    </span>
+                                    <div class="troop-controls">
+                                        <button onclick="updateTroops('Saxony', '${general.name}', -1)">-</button>
+                                        <span class="troop-count">${currentTroops}</span>
+                                        <button onclick="updateTroops('Saxony', '${general.name}', 1)">+</button>
+                                        <span class="max-troops">/ ${MAX_TROOPS}</span>
+                                    </div>
                                 </div>
-                            </div>
-                        `).join('')}
+                            `;
+                        }).join('')}
                     </div>
                 `;
 
                 saxonySection.innerHTML = headerContent + generalsContent;
                 nationsContainer.appendChild(saxonySection);
+            }
 
-                if (generalsData['Saxony']) {
-                    Object.entries(generalsData['Saxony']).forEach(([general, troops]) => {
-                        updateTroopDisplay('Saxony', general, troops);
-                    });
-                }
+            // Update all nation totals
+            nations.forEach(nation => {
+                updateNationTotal(nation);
+            });
+            if (mainNation === 'austria' && saxonySwitched) {
+                updateNationTotal('Saxony');
             }
         }
 
         function updateTroops(nation, general, change) {
-            const generalElement = document.querySelector(`#generalsList_${nation} .general[data-general="${general}"]`);
+            const nationId = getNationId(nation);
+            const generalElement = document.querySelector(`#generalsList_${nationId} .general[data-general="${general}"]`);
+            if (!generalElement) return;
+            
             const countElement = generalElement.querySelector('.troop-count');
+            const checkbox = generalElement.querySelector('input[type="checkbox"]');
             const currentCount = parseInt(countElement.textContent);
             const newCount = Math.max(0, Math.min(MAX_TROOPS, currentCount + change));
             
-            updateTroopDisplay(nation, general, newCount);
-            saveGeneralsData();
+            // Update the display
+            countElement.textContent = newCount;
+            
+            // Update eliminated status and checkbox
+            if (newCount === 0) {
+                generalElement.classList.add('eliminated');
+                checkbox.disabled = true;
+                checkbox.checked = false;
+                // Remove from selected generals if was selected
+                selectedGenerals = selectedGenerals.filter(g => g.name !== general);
+            } else {
+                generalElement.classList.remove('eliminated');
+                checkbox.disabled = false;
+            }
+
+            // Store the data
+            if (!generalsData[nation]) {
+                generalsData[nation] = {};
+            }
+            generalsData[nation][general] = newCount;
+
+            // Update the nation's total
+            updateNationTotal(nation);
+            
+            // Save to localStorage
+            localStorage.setItem('generalsData', JSON.stringify(generalsData));
+            
+            // Update battle strength button state
+            document.getElementById('viewBattleStrength').disabled = selectedGenerals.length === 0;
         }
 
         function updateTroopDisplay(nation, general, count) {
-            const generalElement = document.querySelector(`#generalsList_${nation} .general[data-general="${general}"]`);
+            const nationId = getNationId(nation);
+            const generalElement = document.querySelector(`#generalsList_${nationId} .general[data-general="${general}"]`);
             const countElement = generalElement.querySelector('.troop-count');
             
             countElement.textContent = count;
@@ -366,7 +434,8 @@
         }
 
         function updateNationTotal(nation) {
-            const totalElement = document.getElementById(`total_${nation}`);
+            const nationId = getNationId(nation);
+            const totalElement = document.getElementById(`total_${nationId}`);
             if (totalElement) {
                 const total = Object.values(generalsData[nation] || {}).reduce((sum, count) => sum + count, 0);
                 totalElement.textContent = total;
@@ -426,21 +495,57 @@
             );
         }
 
+        // Track selected generals
+        let selectedGenerals = [];
+
+        function handleGeneralSelection(checkbox) {
+            const generalDiv = checkbox.closest('.general');
+            const generalName = generalDiv.dataset.general;
+            const nation = generalDiv.dataset.nation;
+            const rank = parseInt(generalDiv.dataset.rank);
+            const troops = parseInt(generalDiv.querySelector('.troop-count').textContent);
+
+            if (checkbox.checked) {
+                // Check if we can add this general
+                if (selectedGenerals.length >= 2) {
+                    checkbox.checked = false;
+                    alert('You can only select up to two generals');
+                    return;
+                }
+
+                // Check Prussia/Pragmatic Army restrictions
+                const isPrag = nation === 'Pragmatic Army';
+                const isPrusOrSax = nation === 'Prussia' || nation === 'Saxony';
+                const hasPrag = selectedGenerals.some(g => g.nation === 'Pragmatic Army');
+                const hasPrusOrSax = selectedGenerals.some(g => g.nation === 'Prussia' || g.nation === 'Saxony');
+
+                if ((isPrag && hasPrusOrSax) || (isPrusOrSax && hasPrag)) {
+                    checkbox.checked = false;
+                    alert('Pragmatic Army cannot be combined with Prussia or Saxony');
+                    return;
+                }
+
+                selectedGenerals.push({ name: generalName, nation, rank, troops });
+            } else {
+                selectedGenerals = selectedGenerals.filter(g => g.name !== generalName);
+            }
+
+            // Enable/disable the View Battle Strength button
+            document.getElementById('viewBattleStrength').disabled = selectedGenerals.length === 0;
+        }
+
+        function viewBattleStrength() {
+            if (selectedGenerals.length === 0) return;
+
+            // Store selected generals in localStorage
+            localStorage.setItem('battleGenerals', JSON.stringify(selectedGenerals));
+            
+            // Navigate to battle strength page
+            window.location.href = 'battle.html';
+        }
+
         // Initialize the page when loaded
         initializePage();
-
-        // After initialization, update all nation totals
-        Object.keys(nationGroups[mainNation]).forEach(nation => {
-            updateNationTotal(nation);
-        });
-
-        // Close modal if clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('confirmModal');
-            if (event.target === modal) {
-                closeModal();
-            }
-        }
 
         // Winter scoring functionality
         function initializeWinterScoring() {

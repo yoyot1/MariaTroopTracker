@@ -1,0 +1,104 @@
+body {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+.back-button {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #666;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.back-button:hover {
+    color: #333;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.battle-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.commander-section {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.commander-section h2 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 1.2em;
+}
+
+.general-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.general-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.nation-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 50%;
+    border: 1px solid black;
+}
+
+.general-name {
+    font-size: 1.2em;
+    font-weight: 500;
+}
+
+.general-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.nation-name {
+    color: #666;
+}
+
+.troop-strength {
+    font-weight: bold;
+    color: #2196F3;
+}
+
+.total-strength {
+    text-align: center;
+    padding: 20px;
+    background: #e3f2fd;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.total-strength h2 {
+    margin: 0 0 10px 0;
+    color: #1976D2;
+}
+
+.strength-number {
+    font-size: 2em;
+    font-weight: bold;
+    color: #1976D2;
+} 

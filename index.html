@@ -53,58 +53,42 @@
         }
 
         function checkNationModifications() {
-            // Get saved data
-            const generalsData = JSON.parse(localStorage.getItem('generalsData') || '{}');
+            const saxonyModifier = localStorage.getItem('saxonyModifier');
             const saxonySwitched = localStorage.getItem('saxonySwitched') === 'true';
-            const saxonyModifier = localStorage.getItem('saxonyModifier'); // Which nation made the change
+            const generalsData = JSON.parse(localStorage.getItem('generalsData') || '{}');
             
-            // Check France modifications
-            const franceButton = document.querySelector('.nation-button[onclick*="france"]');
-            if (hasNationModifications('France', generalsData)) {
-                franceButton.classList.add('modified');
-            } else {
-                franceButton.classList.remove('modified');
-            }
-            
-            // Check Austria modifications
-            const austriaButton = document.querySelector('.nation-button[onclick*="austria"]');
-            if (hasNationModifications('Austria', generalsData) || 
-                (saxonyModifier === 'Austria' || saxonyModifier === 'austria')) {
-                austriaButton.classList.add('modified');
-            } else {
-                austriaButton.classList.remove('modified');
-            }
-            
-            // Check Prussia/Pragmatic modifications
-            const prussiaButton = document.querySelector('.nation-button[onclick*="prussia"]');
-            if (hasNationModifications('Prussia', generalsData) || 
-                hasNationModifications('Pragmatic Army', generalsData) ||
-                (saxonyModifier === 'Prussia' || saxonyModifier === 'prussia')) {
-                prussiaButton.classList.add('modified');
-            } else {
-                prussiaButton.classList.remove('modified');
-            }
-        }
+            // Check for troop modifications
+            const hasModifications = (nation) => {
+                if (!generalsData[nation]) return false;
+                return Object.entries(generalsData[nation]).some(([general, troops]) => {
+                    const originalGeneral = nationGenerals[nation]?.find(g => g.name === general);
+                    return (originalGeneral?.troops || 0) !== troops;
+                });
+            };
 
-        function hasNationModifications(nation, generalsData) {
-            if (!generalsData[nation]) return false;
-            
-            // Get original troop values
-            const originalTroops = {};
-            (nationGenerals[nation] || []).forEach(general => {
-                if (general.troops) {
-                    originalTroops[general.name] = general.troops;
-                }
-            });
-            
-            // Compare current values with original values
-            for (const [general, troops] of Object.entries(generalsData[nation])) {
-                if (originalTroops[general] !== troops) {
-                    return true;
-                }
+            // Add modified class for both Saxony changes and troop modifications
+            const austriaButton = document.querySelector('.nation-button[onclick*="austria"]');
+            const prussiaButton = document.querySelector('.nation-button[onclick*="prussia"]');
+            const franceButton = document.querySelector('.nation-button[onclick*="france"]');
+
+            if (austriaButton) {
+                austriaButton.classList.toggle('modified', 
+                    (saxonySwitched && saxonyModifier?.toLowerCase() === 'austria') || 
+                    hasModifications('Austria') ||
+                    (saxonySwitched && hasModifications('Saxony')));
             }
-            
-            return false;
+            if (prussiaButton) {
+                prussiaButton.classList.toggle('modified', 
+                    (saxonySwitched && saxonyModifier?.toLowerCase() === 'prussia') || 
+                    hasModifications('Prussia') || 
+                    hasModifications('Pragmatic Army') ||
+                    (!saxonySwitched && hasModifications('Saxony')));
+            }
+            if (franceButton) {
+                franceButton.classList.toggle('modified', 
+                    hasModifications('France') || 
+                    hasModifications('Bavaria'));
+            }
         }
 
         // Define starting troop values for each nation's generals

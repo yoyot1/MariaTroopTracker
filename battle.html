@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battle Strength - Maria Troop Tracker</title>
+    <link rel="icon" type="image/jpeg" href="images/maria-thumbnail.jpg">
+    <link rel="stylesheet" href="styles/battle.css">
+</head>
+<body>
+    <a href="#" onclick="history.back()" class="back-button">← Back to Troop Tracker</a>
+    <h1>Battle Strength</h1>
+    
+    <div id="battleContainer" class="battle-container">
+        <div id="supremeCommander" class="commander-section">
+            <h2>Supreme Commander</h2>
+            <div class="general-info"></div>
+        </div>
+        <div id="subordinateCommander" class="commander-section" style="display: none;">
+            <h2>Subordinate Commander</h2>
+            <div class="general-info"></div>
+        </div>
+        <div class="total-strength">
+            <h2>Total Battle Strength</h2>
+            <div class="strength-number">0</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const battleGenerals = JSON.parse(localStorage.getItem('battleGenerals') || '[]');
+            
+            if (battleGenerals.length === 0) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Sort generals by rank (lower rank number = higher rank)
+            battleGenerals.sort((a, b) => a.rank - b.rank);
+
+            // Display supreme commander (first general)
+            const supremeDiv = document.querySelector('#supremeCommander .general-info');
+            supremeDiv.innerHTML = createGeneralDisplay(battleGenerals[0]);
+
+            // Display subordinate if exists
+            if (battleGenerals.length > 1) {
+                const subordinateDiv = document.querySelector('#subordinateCommander');
+                subordinateDiv.style.display = 'block';
+                subordinateDiv.querySelector('.general-info').innerHTML = createGeneralDisplay(battleGenerals[1]);
+            }
+
+            // Update total strength
+            const totalStrength = battleGenerals.reduce((sum, general) => sum + general.troops, 0);
+            document.querySelector('.strength-number').textContent = totalStrength;
+        });
+
+        function createGeneralDisplay(general) {
+            return `
+                <div class="general-card">
+                    <div class="general-header">
+                        <img src="images/role_${getNationImageName(general.nation)}.2x.png" alt="${general.nation}" class="nation-icon">
+                        <span class="general-name">${general.name}</span>
+                    </div>
+                    <div class="general-details">
+                        <div class="nation-name">${general.nation}</div>
+                        <div class="troop-strength">Strength: ${general.troops}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getNationImageName(nation) {
+            const imageMap = {
+                'Pragmatic Army': 'pragmatic',
+                'Bavaria': 'bavaria'
+            };
+            return imageMap[nation] || nation.toLowerCase();
+        }
+    </script>
+</body>
+</html> 
