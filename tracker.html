@@ -13,122 +13,6 @@
     
     <div id="nationsContainer" class="nations-container"></div>
 
-    <div class="winter-scoring">
-        <h2>Winter Scoring</h2>
-        <div class="winter-years-buttons" id="winterYearButtons">
-            <button class="year-button" onclick="selectYear(1741)" id="yearBtn_1741">Winter 1741</button>
-            <button class="year-button" onclick="selectYear(1742)" id="yearBtn_1742" disabled>Winter 1742</button>
-            <button class="year-button" onclick="selectYear(1743)" id="yearBtn_1743" disabled>Winter 1743</button>
-            <button class="year-button" onclick="selectYear(1744)" id="yearBtn_1744" disabled>Winter 1744</button>
-        </div>
-        <div id="winterYears" style="display: none">
-            <div class="winter-year" id="winter1741">
-                <h3>Winter 1741</h3>
-                <div class="winter-scores">
-                    <div class="score-input">
-                        <label>France</label>
-                        <input type="number" min="1" max="11" id="score_1741_france">
-                    </div>
-                    <div class="score-input">
-                        <label>Prussia</label>
-                        <input type="number" min="1" max="13" id="score_1741_prussia">
-                    </div>
-                    <div class="score-input">
-                        <label>Austria</label>
-                        <input type="number" min="1" max="8" id="score_1741_austria">
-                    </div>
-                    <div class="score-input">
-                        <label>Pragmatic Army</label>
-                        <input type="number" min="1" max="8" id="score_1741_pragmatic">
-                    </div>
-                </div>
-                <button class="record-button" onclick="recordWinterScores(1741)">Record Scores</button>
-                <div class="recorded-message" id="recorded_1741" style="display: none;">
-                    Scores recorded and hidden
-                </div>
-            </div>
-            
-            <div class="winter-year" id="winter1742">
-                <h3>Winter 1742</h3>
-                <div class="winter-scores">
-                    <div class="score-input">
-                        <label>France</label>
-                        <input type="number" min="1" max="11" id="score_1742_france">
-                    </div>
-                    <div class="score-input">
-                        <label>Prussia</label>
-                        <input type="number" min="1" max="13" id="score_1742_prussia">
-                    </div>
-                    <div class="score-input">
-                        <label>Austria</label>
-                        <input type="number" min="1" max="8" id="score_1742_austria">
-                    </div>
-                    <div class="score-input">
-                        <label>Pragmatic Army</label>
-                        <input type="number" min="1" max="8" id="score_1742_pragmatic">
-                    </div>
-                </div>
-                <button class="record-button" onclick="recordWinterScores(1742)">Record Scores</button>
-                <div class="recorded-message" id="recorded_1742" style="display: none;">
-                    Scores recorded and hidden
-                </div>
-            </div>
-            
-            <div class="winter-year" id="winter1743">
-                <h3>Winter 1743</h3>
-                <div class="winter-scores">
-                    <div class="score-input">
-                        <label>France</label>
-                        <input type="number" min="1" max="11" id="score_1743_france">
-                    </div>
-                    <div class="score-input">
-                        <label>Prussia</label>
-                        <input type="number" min="1" max="13" id="score_1743_prussia">
-                    </div>
-                    <div class="score-input">
-                        <label>Austria</label>
-                        <input type="number" min="1" max="8" id="score_1743_austria">
-                    </div>
-                    <div class="score-input">
-                        <label>Pragmatic Army</label>
-                        <input type="number" min="1" max="8" id="score_1743_pragmatic">
-                    </div>
-                </div>
-                <button class="record-button" onclick="recordWinterScores(1743)">Record Scores</button>
-                <div class="recorded-message" id="recorded_1743" style="display: none;">
-                    Scores recorded and hidden
-                </div>
-            </div>
-            
-            <div class="winter-year" id="winter1744">
-                <h3>Winter 1744</h3>
-                <div class="winter-scores">
-                    <div class="score-input">
-                        <label>France</label>
-                        <input type="number" min="1" max="11" id="score_1744_france">
-                    </div>
-                    <div class="score-input">
-                        <label>Prussia</label>
-                        <input type="number" min="1" max="13" id="score_1744_prussia">
-                    </div>
-                    <div class="score-input">
-                        <label>Austria</label>
-                        <input type="number" min="1" max="8" id="score_1744_austria">
-                    </div>
-                    <div class="score-input">
-                        <label>Pragmatic Army</label>
-                        <input type="number" min="1" max="8" id="score_1744_pragmatic">
-                    </div>
-                </div>
-                <button class="record-button" onclick="recordWinterScores(1744)">Record Scores</button>
-                <div class="recorded-message" id="recorded_1744" style="display: none;">
-                    Scores recorded and hidden
-                </div>
-            </div>
-        </div>
-        <button class="view-final-scores" onclick="viewFinalScores()" id="viewScoresButton">View Final Scores</button>
-    </div>
-
     <!-- Add modal dialog -->
     <div id="confirmModal" class="modal">
         <div class="modal-content">
@@ -141,7 +25,10 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { nations, nationGroups, nationGenerals, getNationId, getNationImageName } from './data/nations.js';
+        import { initializeWinterScoring, selectYear, recordWinterScores, viewFinalScores } from './js/winter-scoring.js';
+
         // Get the nation from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const mainNation = urlParams.get('nation');
@@ -150,71 +37,8 @@
             window.location.href = 'index.html';
         }
 
-        // Define nations with their IDs and properties
-        const nations = {
-            'France': { id: 'france', imageName: 'france' },
-            'Bavaria': { id: 'bavaria', imageName: 'bavaria' },
-            'Austria': { id: 'austria', imageName: 'austria' },
-            'Prussia': { id: 'prussia', imageName: 'prussia' },
-            'Pragmatic Army': { id: 'pragmatic', imageName: 'pragmatic' },
-            'Saxony': { id: 'saxony', imageName: 'saxony' }
-        };
-
-        // Define related nations for each main selection
-        const nationGroups = {
-            'france': ['France', 'Bavaria'],
-            'austria': ['Austria'],
-            'prussia': ['Prussia', 'Pragmatic Army', 'Saxony']
-        };
-
-        // Function to get nation ID
-        function getNationId(nation) {
-            return nations[nation]?.id || nation.toLowerCase();
-        }
-
-        // Function to get the correct image name for each nation
-        function getNationImageName(nation) {
-            return nations[nation]?.imageName || nation.toLowerCase();
-        }
-
         // Track if Saxony has switched sides
         let saxonySwitched = localStorage.getItem('saxonySwitched') === 'true';
-
-        // Define generals for each nation with their ranks
-        const nationGenerals = {
-            'France': [
-                { name: 'Moritz v. Sachsen', rank: 1, troops: 7 },
-                { name: 'Belle-Isle', rank: 2, troops: 6 },
-                { name: 'Broglie', rank: 3, troops: 5 },
-                { name: 'Maillebois', rank: 4 },
-                { name: 'Noailles', rank: 5 }
-            ],
-            'Bavaria': [
-                { name: 'Törring', rank: 1, troops: 5 }
-            ],
-            'Austria': [
-                { name: 'Karl v. Lothringen', rank: 1 },
-                { name: 'Traun', rank: 2 },
-                { name: 'Khevenhüller', rank: 3, troops: 6 },
-                { name: 'Batthyány', rank: 4, troops: 2 },
-                { name: 'Neipperg', rank: 5 },
-                { name: 'Arenberg', rank: 6, troops: 4 }
-            ],
-            'Prussia': [
-                { name: 'Friedrich der Große', rank: 1 },
-                { name: 'Schwerin', rank: 2 },
-                { name: 'Erbprinz Leopold', rank: 3, troops: 4 },
-                { name: 'Der Alte Dessauer', rank: 4, troops: 6 }
-            ],
-            'Pragmatic Army': [
-                { name: 'George II', rank: 1 },
-                { name: 'Cumberland', rank: 2 },
-                { name: 'Earl of Stair', rank: 3 }
-            ],
-            'Saxony': [
-                { name: 'Rutowski', rank: 1, troops: 5 }
-            ]
-        };
 
         const MAX_TROOPS = 8;
 
@@ -262,6 +86,7 @@
             `;
             nationsContainer.appendChild(battleStrengthContainer);
 
+            // Create all nation sections and their content
             nations.forEach(nation => {
                 const nationId = getNationId(nation);
                 const nationSection = document.createElement('div');
@@ -366,6 +191,12 @@
             if (mainNation === 'austria' && saxonySwitched) {
                 updateNationTotal('Saxony');
             }
+
+            // Clear any previous general selections after content is created
+            const checkboxes = document.querySelectorAll('.general-select input[type="checkbox"]');
+            checkboxes.forEach(checkbox => checkbox.checked = false);
+            selectedGenerals = [];
+            document.getElementById('viewBattleStrength').disabled = true;
         }
 
         function updateTroops(nation, general, change) {
@@ -530,240 +361,17 @@
                 selectedGenerals = selectedGenerals.filter(g => g.name !== generalName);
             }
 
+            // Clear any previous supreme commander selection when changing generals
+            localStorage.removeItem('supremeCommander');
+            localStorage.removeItem('battleGenerals');
+
             // Enable/disable the View Battle Strength button
             document.getElementById('viewBattleStrength').disabled = selectedGenerals.length === 0;
         }
 
-        function viewBattleStrength() {
-            if (selectedGenerals.length === 0) return;
-
-            // Store selected generals in localStorage
-            localStorage.setItem('battleGenerals', JSON.stringify(selectedGenerals));
-            
-            // Navigate to battle strength page
-            window.location.href = 'battle.html';
-        }
-
-        // Initialize the page when loaded
-        initializePage();
-
-        // Winter scoring functionality
-        function initializeWinterScoring() {
-            const winterScores = JSON.parse(localStorage.getItem('winterScores') || '{}');
-            const years = [1741, 1742, 1743, 1744];
-            
-            // Update button states based on recorded scores
-            years.forEach((year, index) => {
-                const button = document.getElementById(`yearBtn_${year}`);
-                if (winterScores[year]) {
-                    button.classList.add('completed');
-                    button.disabled = true;
-                    
-                    // Enable next year's button if available
-                    if (index < years.length - 1) {
-                        const nextButton = document.getElementById(`yearBtn_${years[index + 1]}`);
-                        nextButton.disabled = false;
-                    }
-                }
-            });
-
-            // Show view scores button if all years are recorded
-            const allYearsRecorded = years.every(year => winterScores[year]);
-            const viewScoresButton = document.getElementById('viewScoresButton');
-            if (viewScoresButton && allYearsRecorded) {
-                viewScoresButton.style.display = 'block';
-            }
-
-            // Hide all year divs initially
-            document.getElementById('winterYears').style.display = 'none';
-            years.forEach(year => {
-                const yearDiv = document.getElementById(`winter${year}`);
-                if (yearDiv) yearDiv.style.display = 'none';
-            });
-        }
-
-        function selectYear(year) {
-            // Hide all year divs
-            const years = [1741, 1742, 1743, 1744];
-            years.forEach(y => {
-                const yearDiv = document.getElementById(`winter${y}`);
-                if (yearDiv) yearDiv.style.display = 'none';
-            });
-
-            // Show selected year div
-            const selectedYearDiv = document.getElementById(`winter${year}`);
-            if (selectedYearDiv) {
-                document.getElementById('winterYears').style.display = 'block';
-                selectedYearDiv.style.display = 'block';
-            }
-
-            // Update button states
-            years.forEach(y => {
-                const button = document.getElementById(`yearBtn_${y}`);
-                if (button) {
-                    button.classList.remove('active');
-                    if (y === year) {
-                        button.classList.add('active');
-                    }
-                }
-            });
-        }
-
-        function recordWinterScores(year) {
-            const nations = ['france', 'prussia', 'austria', 'pragmatic'];
-            const scores = {};
-            
-            // Define score limits for each nation
-            const scoreLimits = {
-                france: 11,
-                prussia: 13,
-                austria: 8,
-                pragmatic: 8
-            };
-            
-            // Validate all scores are entered and within limits
-            let allScoresValid = true;
-            let errorMessage = '';
-            
-            nations.forEach(nation => {
-                const scoreInput = document.getElementById(`score_${year}_${nation}`);
-                const score = scoreInput.value;
-                
-                if (!score) {
-                    allScoresValid = false;
-                    errorMessage = 'Please enter scores for all nations';
-                    return;
-                }
-                
-                const numScore = parseInt(score);
-                if (numScore < 1 || numScore > scoreLimits[nation]) {
-                    allScoresValid = false;
-                    const nationName = nation.charAt(0).toUpperCase() + nation.slice(1);
-                    const displayName = nationName === 'Pragmatic' ? 'Pragmatic Army' : nationName;
-                    errorMessage = `${displayName} score must be between 1 and ${scoreLimits[nation]} (a score of 0 means the game is already over)`;
-                    return;
-                }
-                
-                scores[nation] = numScore;
-            });
-
-            if (!allScoresValid) {
-                alert(errorMessage);
-                return;
-            }
-
-            // Store scores
-            const winterScores = JSON.parse(localStorage.getItem('winterScores') || '{}');
-            winterScores[year] = scores;
-            localStorage.setItem('winterScores', JSON.stringify(winterScores));
-
-            // Update button states
-            const currentButton = document.getElementById(`yearBtn_${year}`);
-            currentButton.classList.remove('active');
-            currentButton.classList.add('completed');
-            currentButton.disabled = true;
-
-            // Enable next year's button if available
-            const years = [1741, 1742, 1743, 1744];
-            const currentIndex = years.indexOf(year);
-            if (currentIndex < years.length - 1) {
-                const nextButton = document.getElementById(`yearBtn_${years[currentIndex + 1]}`);
-                nextButton.disabled = false;
-            }
-
-            // Hide the scoring interface
-            document.getElementById('winterYears').style.display = 'none';
-
-            // Check if all years are recorded
-            const allYearsRecorded = years.every(y => winterScores[y]);
-            if (allYearsRecorded) {
-                document.getElementById('viewScoresButton').style.display = 'block';
-            }
-        }
-
-        function viewFinalScores() {
-            const winterScores = JSON.parse(localStorage.getItem('winterScores') || '{}');
-            const years = [1741, 1742, 1743, 1744];
-            const nations = ['france', 'prussia', 'austria', 'pragmatic'];
-            
-            // Calculate totals
-            const totals = {};
-            nations.forEach(nation => {
-                totals[nation] = years.reduce((sum, year) => sum + (winterScores[year]?.[nation] || 0), 0);
-            });
-
-            // Find the winner (lowest total)
-            const winningTotal = Math.min(...Object.values(totals));
-            const winners = Object.entries(totals)
-                .filter(([_, total]) => total === winningTotal)
-                .map(([nation, _]) => nation);
-
-            // Create table HTML
-            let tableHtml = '<div style="font-family: Arial; padding: 20px;">';
-            
-            // Add title
-            tableHtml += '<h2 style="margin-bottom: 20px;">Winter Scoring Summary</h2>';
-            
-            // Create the table
-            tableHtml += `
-                <table style="border-collapse: collapse; width: 100%; margin-bottom: 20px;">
-                    <tr style="background: #f8f9fa;">
-                        <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left;">Nation</th>
-                        ${years.map(year => 
-                            `<th style="border: 1px solid #dee2e6; padding: 12px; text-align: center;">${year}</th>`
-                        ).join('')}
-                        <th style="border: 1px solid #dee2e6; padding: 12px; text-align: center;">Total</th>
-                    </tr>
-            `;
-
-            // Add rows for each nation
-            nations.forEach(nation => {
-                const isWinner = winners.includes(nation);
-                const nationName = nation.charAt(0).toUpperCase() + nation.slice(1);
-                const displayName = nationName === 'Pragmatic' ? 'Pragmatic Army' : nationName;
-                
-                tableHtml += `
-                    <tr style="${isWinner ? 'background: #e8f5e9;' : ''}">
-                        <td style="border: 1px solid #dee2e6; padding: 12px; font-weight: ${isWinner ? 'bold' : 'normal'};">
-                            ${displayName}
-                        </td>
-                        ${years.map(year => 
-                            `<td style="border: 1px solid #dee2e6; padding: 12px; text-align: center;">
-                                ${winterScores[year]?.[nation] || '-'}
-                            </td>`
-                        ).join('')}
-                        <td style="border: 1px solid #dee2e6; padding: 12px; text-align: center; font-weight: ${isWinner ? 'bold' : 'normal'};">
-                            ${totals[nation]}
-                        </td>
-                    </tr>
-                `;
-            });
-
-            tableHtml += '</table>';
-
-            // Add winner announcement
-            if (winners.length > 0) {
-                const winnerNames = winners.map(nation => {
-                    const nationName = nation.charAt(0).toUpperCase() + nation.slice(1);
-                    return nationName === 'Pragmatic' ? 'Pragmatic Army' : nationName;
-                });
-                
-                const winnerText = winners.length > 1 
-                    ? `Tie between ${winnerNames.join(' and ')}` 
-                    : `${winnerNames[0]} wins`;
-                    
-                tableHtml += `
-                    <div style="font-weight: bold; color: #2e7d32; margin-top: 10px;">
-                        ${winnerText} with ${winningTotal} points!
-                    </div>
-                `;
-            }
-
-            tableHtml += '</div>';
-
-            // Create a modal dialog for the table
+        function showSupremeCommanderModal() {
             const modalHtml = `
-                <div id="scoresModal" style="
+                <div id="supremeCommanderModal" style="
                     position: fixed;
                     top: 0;
                     left: 0;
@@ -779,30 +387,74 @@
                         background: white;
                         padding: 20px;
                         border-radius: 8px;
-                        max-width: 800px;
+                        max-width: 400px;
                         width: 90%;
-                        max-height: 90vh;
-                        overflow-y: auto;
                         position: relative;
                     ">
-                        <button onclick="document.getElementById('scoresModal').remove()" style="
-                            position: absolute;
-                            top: 10px;
-                            right: 10px;
-                            border: none;
-                            background: none;
-                            font-size: 20px;
-                            cursor: pointer;
-                            padding: 5px 10px;
-                        ">×</button>
-                        ${tableHtml}
+                        <h3 style="margin-top: 0;">Select Supreme Commander</h3>
+                        <p>Both generals have the same rank. Please select who will be the supreme commander:</p>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            ${selectedGenerals.map((general, index) => `
+                                <button onclick="selectSupremeCommander(${index})" style="
+                                    padding: 10px;
+                                    margin: 5px 0;
+                                    border: 1px solid #ccc;
+                                    border-radius: 4px;
+                                    background: white;
+                                    cursor: pointer;
+                                    text-align: left;
+                                ">
+                                    ${general.name} (${general.nation})
+                                </button>
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
             `;
-
-            // Add the modal to the page
             document.body.insertAdjacentHTML('beforeend', modalHtml);
         }
+
+        function selectSupremeCommander(index) {
+            const supremeCommander = selectedGenerals[index];
+            localStorage.setItem('supremeCommander', JSON.stringify(supremeCommander));
+            document.getElementById('supremeCommanderModal').remove();
+            // After selecting supreme commander, proceed to battle page
+            window.location.href = 'battle.html';
+        }
+
+        function viewBattleStrength() {
+            if (selectedGenerals.length === 0) return;
+
+            // Store selected generals in localStorage
+            localStorage.setItem('battleGenerals', JSON.stringify(selectedGenerals));
+
+            // Check if we need a supreme commander selection
+            if (selectedGenerals.length === 2 && selectedGenerals[0].rank === selectedGenerals[1].rank) {
+                showSupremeCommanderModal();
+                return;
+            }
+
+            // If no supreme commander needed, clear any previous selection
+            localStorage.removeItem('supremeCommander');
+            
+            // Navigate to battle strength page
+            window.location.href = 'battle.html';
+        }
+
+        // Make functions available to the global scope for event handlers
+        window.updateTroops = updateTroops;
+        window.handleGeneralSelection = handleGeneralSelection;
+        window.viewBattleStrength = viewBattleStrength;
+        window.selectSupremeCommander = selectSupremeCommander;
+        window.removeSaxony = removeSaxony;
+        window.addSaxonyToNation = addSaxonyToNation;
+        window.selectYear = selectYear;
+        window.recordWinterScores = recordWinterScores;
+        window.viewFinalScores = viewFinalScores;
+        window.closeModal = closeModal;
+
+        // Initialize the page when loaded
+        initializePage();
 
         // Initialize winter scoring after page load
         document.addEventListener('DOMContentLoaded', initializeWinterScoring);

@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="styles/battle.css">
 </head>
 <body>
-    <a href="#" onclick="history.back()" class="back-button">← Back to Troop Tracker</a>
+    <a href="#" onclick="clearSelectionsAndGoBack(); return false;" class="back-button">← Back to Troop Tracker</a>
     <h1>Battle Strength</h1>
     
     <div id="battleContainer" class="battle-container">
@@ -26,7 +26,18 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { getNationId, getNationImageName } from './data/nations.js';
+
+        function clearSelectionsAndGoBack() {
+            // Clear battle-related data from localStorage
+            localStorage.removeItem('battleGenerals');
+            localStorage.removeItem('supremeCommander');
+            // Force a reload of the tracker page to ensure it reinitializes
+            window.location.href = document.referrer;
+        }
+        window.clearSelectionsAndGoBack = clearSelectionsAndGoBack;
+
         document.addEventListener('DOMContentLoaded', () => {
             const battleGenerals = JSON.parse(localStorage.getItem('battleGenerals') || '[]');
             
@@ -35,46 +46,68 @@
                 return;
             }
 
-            // Sort generals by rank (lower rank number = higher rank)
-            battleGenerals.sort((a, b) => a.rank - b.rank);
+            // Get supreme commander if it was selected for same-rank generals
+            const supremeCommander = localStorage.getItem('supremeCommander');
+            let generals = [...battleGenerals];
+
+            // If we have a supreme commander selected (for same-rank generals)
+            if (supremeCommander && battleGenerals[0].rank === battleGenerals[1]?.rank) {
+                const supreme = JSON.parse(supremeCommander);
+                generals = battleGenerals.sort((a, b) => {
+                    if (a.name === supreme.name) return -1;
+                    if (b.name === supreme.name) return 1;
+                    return 0;
+                });
+            } else {
+                // Sort generals by rank (lower rank number = higher rank)
+                generals.sort((a, b) => a.rank - b.rank);
+            }
 
             // Display supreme commander (first general)
             const supremeDiv = document.querySelector('#supremeCommander .general-info');
-            supremeDiv.innerHTML = createGeneralDisplay(battleGenerals[0]);
+            supremeDiv.innerHTML = createGeneralDisplay(generals[0], true, generals[1]?.rank);
 
             // Display subordinate if exists
-            if (battleGenerals.length > 1) {
+            if (generals.length > 1) {
                 const subordinateDiv = document.querySelector('#subordinateCommander');
                 subordinateDiv.style.display = 'block';
-                subordinateDiv.querySelector('.general-info').innerHTML = createGeneralDisplay(battleGenerals[1]);
+                subordinateDiv.querySelector('.general-info').innerHTML = createGeneralDisplay(generals[1], false, generals[0].rank);
             }
 
             // Update total strength
-            const totalStrength = battleGenerals.reduce((sum, general) => sum + general.troops, 0);
+            const totalStrength = generals.reduce((sum, general) => sum + general.troops, 0);
             document.querySelector('.strength-number').textContent = totalStrength;
         });
 
-        function createGeneralDisplay(general) {
+        function createGeneralDisplay(general, isSupreme, otherRank) {
+            // Only show supreme commander note if:
+            // 1. This is the supreme commander (isSupreme is true)
+            // 2. Both generals have the same rank
+            // 3. A supreme commander was explicitly selected
+            const showSupremeNote = isSupreme && 
+                                  general.rank === otherRank && 
+                                  localStorage.getItem('supremeCommander');
+            
+            const nationId = getNationId(general.nation);
+            
             return `
-                <div class="general-card">
-                    <div class="general-header">
-                        <img src="images/role_${getNationImageName(general.nation)}.2x.png" alt="${general.nation}" class="nation-icon">
-                        <span class="general-name">${general.name}</span>
-                    </div>
-                    <div class="general-details">
-                        <div class="nation-name">${general.nation}</div>
-                        <div class="troop-strength">Strength: ${general.troops}</div>
+                <div class="nation-${nationId}">
+                    <div class="general-card">
+                        <div class="general-header">
+                            <img src="images/role_${getNationImageName(general.nation)}.2x.png" alt="${general.nation}" class="nation-icon">
+                            <div class="name-and-rank">
+                                <span class="general-name">${general.name}</span>
+                                ${general.rank ? `<span class="rank-badge">Rank ${general.rank}</span>` : ''}
+                                ${showSupremeNote ? '<span class="supreme-note">user selected supreme commander</span>' : ''}
+                            </div>
+                        </div>
+                        <div class="general-details">
+                            <div class="nation-name">${general.nation}</div>
+                            <div class="troop-strength">Strength: ${general.troops}</div>
+                        </div>
                     </div>
                 </div>
             `;
-        }
-
-        function getNationImageName(nation) {
-            const imageMap = {
-                'Pragmatic Army': 'pragmatic',
-                'Bavaria': 'bavaria'
-            };
-            return imageMap[nation] || nation.toLowerCase();
         }
     </script>
 </body>

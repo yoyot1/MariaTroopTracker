@@ -47,10 +47,13 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { nationGenerals } from './data/nations.js';
+
         function selectNation(nation) {
             window.location.href = `tracker.html?nation=${nation}`;
         }
+        window.selectNation = selectNation;
 
         function checkNationModifications() {
             const saxonyModifier = localStorage.getItem('saxonyModifier');
@@ -91,49 +94,15 @@
             }
         }
 
-        // Define starting troop values for each nation's generals
-        const nationGenerals = {
-            'France': [
-                { name: 'Moritz v. Sachsen', rank: 1, troops: 7 },
-                { name: 'Belle-Isle', rank: 2, troops: 6 },
-                { name: 'Broglie', rank: 3, troops: 5 },
-                { name: 'Maillebois', rank: 4 },
-                { name: 'Noailles', rank: 5 }
-            ],
-            'Bavaria': [
-                { name: 'Törring', rank: 1, troops: 5 }
-            ],
-            'Austria': [
-                { name: 'Karl v. Lothringen', rank: 1 },
-                { name: 'Traun', rank: 2 },
-                { name: 'Khevenhüller', rank: 3, troops: 6 },
-                { name: 'Batthyány', rank: 4, troops: 2 },
-                { name: 'Neipperg', rank: 5 },
-                { name: 'Arenberg', rank: 6, troops: 4 }
-            ],
-            'Prussia': [
-                { name: 'Friedrich der Große', rank: 1 },
-                { name: 'Schwerin', rank: 2 },
-                { name: 'Erbprinz Leopold', rank: 3, troops: 4 },
-                { name: 'Der Alte Dessauer', rank: 4, troops: 6 }
-            ],
-            'Pragmatic Army': [
-                { name: 'George II', rank: 1 },
-                { name: 'Cumberland', rank: 2 },
-                { name: 'Earl of Stair', rank: 3 }
-            ],
-            'Saxony': [
-                { name: 'Rutowski', rank: 1, troops: 5 }
-            ]
-        };
-
         function showResetConfirmation() {
             document.getElementById('confirmModal').style.display = 'block';
         }
+        window.showResetConfirmation = showResetConfirmation;
 
         function closeModal() {
             document.getElementById('confirmModal').style.display = 'none';
         }
+        window.closeModal = closeModal;
 
         function resetToStartingValues() {
             localStorage.clear();
@@ -143,6 +112,7 @@
             // Update button states after reset
             checkNationModifications();
         }
+        window.resetToStartingValues = resetToStartingValues;
 
         // Close modal if clicking outside
         window.onclick = function(event) {
@@ -154,38 +124,6 @@
 
         // Check for modifications when the page loads
         document.addEventListener('DOMContentLoaded', checkNationModifications);
-
-        function removeSaxony() {
-            const message = mainNation === 'prussia' ? 
-                'Are you sure you want to remove Saxony? It will become available to Austria.' :
-                'Are you sure you want to remove Saxony? It will return to Prussia.';
-            
-            showModal(
-                'Remove Saxony',
-                message,
-                () => {
-                    saxonySwitched = mainNation === 'prussia';
-                    localStorage.setItem('saxonySwitched', saxonySwitched);
-                    // Store which nation made the change
-                    localStorage.setItem('saxonyModifier', mainNation);
-                    window.location.reload();
-                }
-            );
-        }
-
-        function addSaxonyToNation(nation) {
-            showModal(
-                'Add Saxony',
-                `Add Saxony to ${nation}?`,
-                () => {
-                    saxonySwitched = nation === 'Austria';
-                    localStorage.setItem('saxonySwitched', saxonySwitched);
-                    // Store which nation made the change
-                    localStorage.setItem('saxonyModifier', nation.toLowerCase());
-                    window.location.reload();
-                }
-            );
-        }
     </script>
 </body>
 </html> 
