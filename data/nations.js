@@ -12,7 +12,7 @@ export const nations = {
 export const nationGroups = {
     'france': ['France', 'Bavaria'],
     'austria': ['Austria'],
-    'prussia': ['Prussia', 'Pragmatic Army', 'Saxony']
+    'prussia': ['Prussia', 'Saxony', 'Pragmatic Army']
 };
 
 // Generals for each nation with their ranks and initial troops
