@@ -93,7 +93,7 @@
             // Show/hide setup mode button based on completion state
             const setupButton = document.getElementById('setupModeButton');
             setupButton.style.display = setupModeCompleted ? 'none' : 'block';
-
+            
             // Update setup button state if in setup mode
             if (isSetupMode) {
                 setupButton.textContent = 'Exit Setup Mode';
@@ -329,19 +329,20 @@
             const modalTitle = document.getElementById('modalTitle');
             const modalMessage = document.getElementById('modalMessage');
             const confirmButton = document.getElementById('modalConfirm');
-
+            
             modalTitle.textContent = title;
             modalMessage.textContent = message;
-            modal.style.display = 'block';
-
             confirmButton.onclick = () => {
+                modal.classList.remove('show');
                 onConfirm();
-                closeModal();
             };
+            
+            modal.classList.add('show');
         }
 
         function closeModal() {
-            document.getElementById('confirmModal').style.display = 'none';
+            const modal = document.getElementById('confirmModal');
+            modal.classList.remove('show');
         }
 
         function removeSaxony() {
@@ -417,22 +418,24 @@
         }
 
         function showSupremeCommanderModal() {
-            const modalHtml = `
-                <div id="supremeCommanderModal" class="modal-overlay">
-                    <div class="modal-content">
-                        <h3>Select Supreme Commander</h3>
-                        <p>Both generals have the same rank. Please select who will be the supreme commander:</p>
-                        <div class="modal-buttons">
-                            ${selectedGenerals.map((general, index) => `
-                                <button onclick="selectSupremeCommander(${index})" class="modal-button">
-                                    ${general.name} (${general.nation})
-                                </button>
-                            `).join('')}
-                        </div>
+            const modal = document.createElement('div');
+            modal.id = 'supremeCommanderModal';
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>Select Supreme Commander</h3>
+                    <p>Both generals have the same rank. Please select who will be the supreme commander:</p>
+                    <div class="modal-buttons">
+                        ${selectedGenerals.map((general, index) => `
+                            <button onclick="selectSupremeCommander(${index})" class="modal-button">
+                                ${general.name} (${general.nation})
+                            </button>
+                        `).join('')}
                     </div>
                 </div>
             `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            document.body.appendChild(modal);
+            modal.classList.add('show');
         }
 
         function selectSupremeCommander(index) {
