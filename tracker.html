@@ -53,7 +53,7 @@
         const MAX_TROOPS = 8;
 
         // Setup mode state
-        let isSetupMode = false;
+        let isSetupMode = localStorage.getItem('setupMode') === 'true';
         let setupModeCompleted = localStorage.getItem('setupModeCompleted') === 'true';
 
         // Store generals and their troop counts
@@ -93,6 +93,13 @@
             // Show/hide setup mode button based on completion state
             const setupButton = document.getElementById('setupModeButton');
             setupButton.style.display = setupModeCompleted ? 'none' : 'block';
+
+            // Update setup button state if in setup mode
+            if (isSetupMode) {
+                setupButton.textContent = 'Exit Setup Mode';
+                setupButton.classList.add('active');
+                document.getElementById('viewBattleStrength').style.display = 'none';
+            }
 
             // Create all nation sections and their content
             nations.forEach(nation => {
@@ -242,7 +249,8 @@
                 }
             }
             
-            const newCount = Math.max(startingTroops, Math.min(MAX_TROOPS, currentCount + change));
+            // Calculate new count - allow going to 0 outside setup mode
+            const newCount = Math.max(0, Math.min(MAX_TROOPS, currentCount + change));
             
             // Update the display
             countElement.textContent = newCount;
