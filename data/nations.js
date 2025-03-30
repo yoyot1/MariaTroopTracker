@@ -1,10 +1,10 @@
 // Nation definitions with their IDs and properties
 export const nations = {
-    'France': { id: 'france', imageName: 'france' },
+    'France': { id: 'france', imageName: 'france', setupModeLimit: 26 },
     'Bavaria': { id: 'bavaria', imageName: 'bavaria' },
-    'Austria': { id: 'austria', imageName: 'austria' },
-    'Prussia': { id: 'prussia', imageName: 'prussia' },
-    'Pragmatic Army': { id: 'pragmatic', imageName: 'pragmatic' },
+    'Austria': { id: 'austria', imageName: 'austria', setupModeLimit: 28 },
+    'Prussia': { id: 'prussia', imageName: 'prussia', setupModeLimit: 22 },
+    'Pragmatic Army': { id: 'pragmatic', imageName: 'pragmatic', setupModeLimit: 14 },
     'Saxony': { id: 'saxony', imageName: 'saxony' }
 };
 
@@ -58,4 +58,13 @@ export function getNationId(nation) {
 
 export function getNationImageName(nation) {
     return nations[nation]?.imageName || nation.toLowerCase();
+}
+
+export function getNationSetupLimit(nation) {
+    return nations[nation]?.setupModeLimit || 0;
+}
+
+export function getStartingTroops(nation) {
+    return (nationGenerals[nation] || [])
+        .reduce((sum, general) => sum + (general.troops || 0), 0);
 } 
