@@ -289,14 +289,11 @@ button {
 
 /* General styles */
 .general {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    gap: 10px;
+    display: flex;
     align-items: center;
-    padding: 10px;
-    background: white;
-    border-radius: 4px;
-    margin-bottom: 8px;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    gap: 8px;
 }
 
 .general.eliminated .general-name {
@@ -307,10 +304,8 @@ button {
     display: flex;
     align-items: center;
     gap: 8px;
+    font-weight: bold;
     min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .rank-number {
@@ -324,7 +319,8 @@ button {
 .troop-controls {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
+    margin-left: auto;
     flex-shrink: 0;
 }
 
@@ -490,9 +486,8 @@ button {
 }
 
 .general-select {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
+    width: 24px;
+    flex-shrink: 0;
 }
 
 .general-select input[type="checkbox"] {
@@ -536,4 +531,31 @@ button {
 .setup-mode-button:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
+}
+
+.general-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.starting-position {
+    font-size: 0.8em;
+    color: #666;
+    font-family: monospace;
+    display: block;
+    margin-top: 2px;
+    margin-left: 24px;
+}
+
+/* When in setup mode, align text to the left */
+.setup-mode .general-info {
+    margin-left: 0;
+}
+
+.setup-mode .starting-position {
+    margin-left: 0;
+}
+
+.setup-mode .general-name {
+    margin-left: 0;
 } 

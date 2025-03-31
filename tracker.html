@@ -66,7 +66,9 @@
             }
             
             generals.forEach(general => {
+                // Only initialize if the general doesn't exist in generalsData
                 if (!(general.name in generalsData[nation])) {
+                    // Set to 0 if no starting troops, otherwise use the starting troops
                     generalsData[nation][general.name] = general.troops || 0;
                 }
             });
@@ -78,6 +80,14 @@
         // Initialize the page
         function initializePage() {
             const nationsContainer = document.getElementById('nationsContainer');
+            if (!nationsContainer) {
+                console.error('Nations container not found');
+                return;
+            }
+
+            // Clear the container
+            nationsContainer.innerHTML = '';
+
             const nations = nationGroups[mainNation].filter(nation => {
                 // Only filter out Saxony if we're Prussia and it's switched to Austria
                 if (nation === 'Saxony') {
@@ -128,20 +138,35 @@
                 const generalsContent = `
                     <div id="generalsList_${nationId}">
                         ${(nationGenerals[nation] || []).map(general => {
-                            const currentTroops = generalsData[nation]?.[general.name] ?? 0;
+                            const currentCount = generalsData[nation]?.[general.name] || general.troops || 0;
+                            const isEliminated = !isSetupMode && currentCount === 0;
+                            const isDisabled = isSetupMode && (nation === 'Bavaria' || nation === 'Saxony');
+                            const isDecrementDisabled = isDisabled;
+                            
+                            // Debug logging
+                            // console.log('General:', general.name, 'Starting Position:', general.startingPosition, 'Setup Mode:', isSetupMode);
+                            // console.log('Current Count:', currentCount, 'Is Disabled:', isDisabled, 'Is Decrement Disabled:', isDecrementDisabled);
+                            
                             return `
-                                <div class="general ${currentTroops === 0 ? 'eliminated' : ''}" data-general="${general.name}" data-nation="${nation}" data-rank="${general.rank}">
-                                    <label class="general-select">
-                                        <input type="checkbox" onchange="handleGeneralSelection(this)" ${currentTroops === 0 ? 'disabled' : ''}>
-                                    </label>
-                                    <span class="general-name">
-                                        <span class="rank-number">${general.rank}</span>
-                                        ${general.name}
-                                    </span>
+                                <div class="general ${isEliminated ? 'eliminated' : ''}" data-general="${general.name}" data-nation="${nation}" data-rank="${general.rank}">
+                                    ${!isSetupMode ? `
+                                    <div class="general-select">
+                                        <input type="checkbox" 
+                                               onchange="handleGeneralSelection(this)"
+                                               ${isEliminated ? 'disabled' : ''}>
+                                    </div>
+                                    ` : ''}
+                                    <div class="general-info">
+                                        <div class="general-name">
+                                            <span class="rank-number">${general.rank}</span>
+                                            ${general.name}
+                                        </div>
+                                        ${isSetupMode && general.startingPosition ? `<div class="starting-position">Starting position: ${general.startingPosition}</div>` : ''}
+                                    </div>
                                     <div class="troop-controls">
-                                        <button onclick="updateTroops('${nation}', '${general.name}', -1)">-</button>
-                                        <span class="troop-count">${currentTroops}</span>
-                                        <button onclick="updateTroops('${nation}', '${general.name}', 1)">+</button>
+                                        <button onclick="updateTroops('${nation}', '${general.name}', -1)" ${isDecrementDisabled ? 'disabled' : ''}>-</button>
+                                        <span class="troop-count">${currentCount}</span>
+                                        <button onclick="updateTroops('${nation}', '${general.name}', 1)" ${isDisabled ? 'disabled' : ''}>+</button>
                                         <span class="max-troops">/ ${MAX_TROOPS}</span>
                                     </div>
                                 </div>
@@ -173,20 +198,35 @@
                 const generalsContent = `
                     <div id="generalsList_Saxony">
                         ${nationGenerals['Saxony'].map(general => {
-                            const currentTroops = generalsData['Saxony']?.[general.name] ?? 0;
+                            const currentCount = generalsData['Saxony']?.[general.name] || general.troops || 0;
+                            const isEliminated = !isSetupMode && currentCount === 0;
+                            const isDisabled = isSetupMode && (nation === 'Bavaria' || nation === 'Saxony');
+                            const isDecrementDisabled = isDisabled;
+                            
+                            // Debug logging
+                            // console.log('Saxony General:', general.name, 'Starting Position:', general.startingPosition, 'Setup Mode:', isSetupMode);
+                            // console.log('Current Count:', currentCount, 'Is Disabled:', isDisabled, 'Is Decrement Disabled:', isDecrementDisabled);
+                            
                             return `
-                                <div class="general ${currentTroops === 0 ? 'eliminated' : ''}" data-general="${general.name}" data-nation="Saxony" data-rank="${general.rank}">
-                                    <label class="general-select">
-                                        <input type="checkbox" onchange="handleGeneralSelection(this)" ${currentTroops === 0 ? 'disabled' : ''}>
-                                    </label>
-                                    <span class="general-name">
-                                        <span class="rank-number">${general.rank}</span>
-                                        ${general.name}
-                                    </span>
+                                <div class="general ${isEliminated ? 'eliminated' : ''}" data-general="${general.name}" data-nation="Saxony" data-rank="${general.rank}">
+                                    ${!isSetupMode ? `
+                                    <div class="general-select">
+                                        <input type="checkbox" 
+                                               onchange="handleGeneralSelection(this)"
+                                               ${isEliminated ? 'disabled' : ''}>
+                                    </div>
+                                    ` : ''}
+                                    <div class="general-info">
+                                        <div class="general-name">
+                                            <span class="rank-number">${general.rank}</span>
+                                            ${general.name}
+                                        </div>
+                                        ${isSetupMode && general.startingPosition ? `<div class="starting-position">Starting position: ${general.startingPosition}</div>` : ''}
+                                    </div>
                                     <div class="troop-controls">
-                                        <button onclick="updateTroops('Saxony', '${general.name}', -1)">-</button>
-                                        <span class="troop-count">${currentTroops}</span>
-                                        <button onclick="updateTroops('Saxony', '${general.name}', 1)">+</button>
+                                        <button onclick="updateTroops('Saxony', '${general.name}', -1)" ${isDecrementDisabled ? 'disabled' : ''}>-</button>
+                                        <span class="troop-count">${currentCount}</span>
+                                        <button onclick="updateTroops('Saxony', '${general.name}', 1)" ${isDisabled ? 'disabled' : ''}>+</button>
                                         <span class="max-troops">/ ${MAX_TROOPS}</span>
                                     </div>
                                 </div>
@@ -220,7 +260,6 @@
             if (!generalElement) return;
             
             const countElement = generalElement.querySelector('.troop-count');
-            const checkbox = generalElement.querySelector('input[type="checkbox"]');
             const currentCount = parseInt(countElement.textContent);
             const generalData = nationGenerals[nation].find(g => g.name === general);
             const startingTroops = generalData?.troops || 0;
@@ -247,6 +286,11 @@
                     alert(`Cannot exceed ${setupLimit} total troops for ${nation} in setup mode`);
                     return;
                 }
+            } else {
+                // Outside of setup mode, only prevent going below 0
+                if (change < 0 && currentCount <= 0) {
+                    return;
+                }
             }
             
             // Calculate new count - allow going to 0 outside setup mode
@@ -255,16 +299,20 @@
             // Update the display
             countElement.textContent = newCount;
             
-            // Update eliminated status and checkbox
-            if (newCount === 0) {
-                generalElement.classList.add('eliminated');
-                checkbox.disabled = true;
-                checkbox.checked = false;
-                // Remove from selected generals if was selected
-                selectedGenerals = selectedGenerals.filter(g => g.name !== general);
-            } else {
-                generalElement.classList.remove('eliminated');
-                checkbox.disabled = false;
+            // Update eliminated status and checkbox if not in setup mode
+            if (!isSetupMode) {
+                const checkbox = generalElement.querySelector('input[type="checkbox"]');
+                if (newCount === 0) {
+                    generalElement.classList.add('eliminated');
+                    checkbox.disabled = true;
+                    checkbox.checked = false;
+                    // Remove from selected generals if was selected
+                    selectedGenerals = selectedGenerals.filter(g => g.name !== general);
+                } else if (currentCount === 0) {
+                    // Only remove eliminated status if coming from 0
+                    generalElement.classList.remove('eliminated');
+                    checkbox.disabled = false;
+                }
             }
 
             // Store the data
@@ -279,8 +327,10 @@
             // Save to localStorage
             localStorage.setItem('generalsData', JSON.stringify(generalsData));
             
-            // Update battle strength button state
-            document.getElementById('viewBattleStrength').disabled = selectedGenerals.length === 0;
+            // Update battle strength button state if not in setup mode
+            if (!isSetupMode) {
+                document.getElementById('viewBattleStrength').disabled = selectedGenerals.length === 0;
+            }
         }
 
         function updateTroopDisplay(nation, general, count) {
@@ -310,7 +360,7 @@
         function updateNationTotal(nation) {
             const nationId = getNationId(nation);
             const totalElement = document.getElementById(`total_${nationId}`);
-            const total = Object.values(generalsData[nation] || {}).reduce((sum, count) => sum + count, 0);
+                const total = Object.values(generalsData[nation] || {}).reduce((sum, count) => sum + count, 0);
             
             if (isSetupMode && nation !== 'Bavaria' && nation !== 'Saxony') {
                 const setupLimit = getNationSetupLimit(nation);
@@ -329,7 +379,7 @@
             const modalTitle = document.getElementById('modalTitle');
             const modalMessage = document.getElementById('modalMessage');
             const confirmButton = document.getElementById('modalConfirm');
-            
+
             modalTitle.textContent = title;
             modalMessage.textContent = message;
             confirmButton.onclick = () => {
@@ -477,7 +527,8 @@
                 setupButton.classList.add('active');
                 battleButton.style.display = 'none';
                 localStorage.setItem('setupMode', 'true');
-                updateAllNations();
+                document.body.classList.add('setup-mode');
+                initializePage(); // Reinitialize the page to show starting positions
             } else {
                 // Exit setup mode
                 exitSetupMode();
@@ -551,7 +602,8 @@
             localStorage.removeItem('setupMode');
             setupModeCompleted = true;
             localStorage.setItem('setupModeCompleted', 'true');
-            updateAllNations();
+            document.body.classList.remove('setup-mode');
+            initializePage(); // Call initializePage instead of updateAllNations
         }
 
         function updateAllNations() {
@@ -589,7 +641,13 @@
 
         // Initialize the page when loaded
         document.addEventListener('DOMContentLoaded', () => {
+            // Clear any previous general selections
+            selectedGenerals = [];
+            
+            // Initialize the page
             initializePage();
+            
+            // Initialize winter scoring
             initializeWinterScoring();
         });
     </script>

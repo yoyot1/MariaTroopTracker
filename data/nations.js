@@ -18,36 +18,36 @@ export const nationGroups = {
 // Generals for each nation with their ranks and initial troops
 export const nationGenerals = {
     'France': [
-        { name: 'Moritz v. Sachsen', rank: 1, troops: 7 },
-        { name: 'Belle-Isle', rank: 2, troops: 6 },
-        { name: 'Broglie', rank: 3, troops: 5 },
-        { name: 'Maillebois', rank: 4 },
-        { name: 'Noailles', rank: 5 }
+        { name: 'Moritz v. Sachsen', rank: 1, troops: 7, startingPosition: 'A1' },
+        { name: 'Belle-Isle', rank: 2, troops: 6, startingPosition: 'G5' },
+        { name: 'Broglie', rank: 3, troops: 5, startingPosition: 'G3' },
+        { name: 'Maillebois', rank: 4, startingPosition: 'A6' },
+        { name: 'Noailles', rank: 5, startingPosition: 'D4' }
     ],
     'Bavaria': [
-        { name: 'Törring', rank: 1, troops: 5 }
+        { name: 'Törring', rank: 1, troops: 5, startingPosition: 'G3' }
     ],
     'Austria': [
-        { name: 'Karl v. Lothringen', rank: 1 },
-        { name: 'Traun', rank: 2 },
-        { name: 'Khevenhüller', rank: 3, troops: 6 },
-        { name: 'Batthyány', rank: 4, troops: 2 },
-        { name: 'Neipperg', rank: 5 },
-        { name: 'Arenberg', rank: 6, troops: 4 }
+        { name: 'Karl v. Lothringen', rank: 1, startingPosition: 'M4' },
+        { name: 'Traun', rank: 2, startingPosition: 'M1' },
+        { name: 'Khevenhüller', rank: 3, troops: 6, startingPosition: 'N1' },
+        { name: 'Batthyány', rank: 4, troops: 2, startingPosition: 'N1' },
+        { name: 'Neipperg', rank: 5, startingPosition: 'L6' },
+        { name: 'Arenberg', rank: 6, troops: 4, startingPosition: 'C7' }
     ],
     'Prussia': [
-        { name: 'Friedrich der Große', rank: 1 },
-        { name: 'Schwerin', rank: 2 },
-        { name: 'Erbprinz Leopold', rank: 3, troops: 4 },
-        { name: 'Der Alte Dessauer', rank: 4, troops: 6 }
+        { name: 'Friedrich der Große', rank: 1, startingPosition: 'L9' },
+        { name: 'Schwerin', rank: 2, startingPosition: 'L9' },
+        { name: 'Erbprinz Leopold', rank: 3, troops: 4, startingPosition: 'K9' },
+        { name: 'Der Alte Dessauer', rank: 4, troops: 6, startingPosition: 'K12' }
     ],
     'Pragmatic Army': [
-        { name: 'George II', rank: 1 },
-        { name: 'Cumberland', rank: 2 },
-        { name: 'Earl of Stair', rank: 3 }
+        { name: 'George II', rank: 1, startingPosition: 'E11' },
+        { name: 'Cumberland', rank: 2, startingPosition: 'E11' },
+        { name: 'Earl of Stair', rank: 3, startingPosition: 'C10' }
     ],
     'Saxony': [
-        { name: 'Rutowski', rank: 1, troops: 5 }
+        { name: 'Rutowski', rank: 1, troops: 5, startingPosition: 'I8' }
     ]
 };
 
