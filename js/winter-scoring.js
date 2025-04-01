@@ -23,7 +23,13 @@ export function initializeWinterScoring() {
         <button class="view-final-scores" onclick="viewFinalScores()" id="viewScoresButton" style="display: none">View Final Scores</button>
     `;
 
+    // Add the container to the page
     document.body.appendChild(winterContainer);
+
+    // Hide if in setup mode
+    if (document.body.classList.contains('setup-mode')) {
+        winterContainer.style.display = 'none';
+    }
 
     // Create year buttons
     const buttonsContainer = winterContainer.querySelector('.winter-years-buttons');
@@ -71,25 +77,64 @@ export function selectYear(year) {
             <div class="winter-scores">
                 <div class="score-input">
                     <label for="score_${year}_france">France:</label>
-                    <input type="number" id="score_${year}_france" min="1" max="${SCORE_LIMITS.france}">
+                    <input type="number" id="score_${year}_france" min="1" max="${SCORE_LIMITS.france}" onchange="validateWinterScores(${year})" onkeyup="validateWinterScores(${year})">
                 </div>
                 <div class="score-input">
                     <label for="score_${year}_prussia">Prussia:</label>
-                    <input type="number" id="score_${year}_prussia" min="1" max="${SCORE_LIMITS.prussia}">
+                    <input type="number" id="score_${year}_prussia" min="1" max="${SCORE_LIMITS.prussia}" onchange="validateWinterScores(${year})" onkeyup="validateWinterScores(${year})">
                 </div>
                 <div class="score-input">
                     <label for="score_${year}_austria">Austria:</label>
-                    <input type="number" id="score_${year}_austria" min="1" max="${SCORE_LIMITS.austria}">
+                    <input type="number" id="score_${year}_austria" min="1" max="${SCORE_LIMITS.austria}" onchange="validateWinterScores(${year})" onkeyup="validateWinterScores(${year})">
                 </div>
                 <div class="score-input">
                     <label for="score_${year}_pragmatic">Pragmatic Army:</label>
-                    <input type="number" id="score_${year}_pragmatic" min="1" max="${SCORE_LIMITS.pragmatic}">
+                    <input type="number" id="score_${year}_pragmatic" min="1" max="${SCORE_LIMITS.pragmatic}" onchange="validateWinterScores(${year})" onkeyup="validateWinterScores(${year})">
                 </div>
             </div>
-            <button onclick="recordWinterScores(${year})" style="margin-top: 15px;">Record Scores</button>
+            <div class="winter-buttons">
+                <button onclick="cancelWinterScoring()" class="cancel-button">Cancel</button>
+                <button onclick="recordWinterScores(${year})" class="record-button" id="recordButton_${year}" disabled>Record Scores</button>
+            </div>
         </div>
     `;
+
+    // Initial validation
+    validateWinterScores(year);
 }
+
+export function validateWinterScores(year) {
+    const nations = ['france', 'prussia', 'austria', 'pragmatic'];
+    const recordButton = document.getElementById(`recordButton_${year}`);
+    
+    // Check if all scores are valid
+    const allScoresValid = nations.every(nation => {
+        const scoreInput = document.getElementById(`score_${year}_${nation}`);
+        const score = scoreInput.value;
+        
+        if (!score) return false;
+        
+        const numScore = parseInt(score);
+        return numScore >= 1 && numScore <= SCORE_LIMITS[nation];
+    });
+
+    // Enable/disable record button based on validation
+    recordButton.disabled = !allScoresValid;
+}
+
+// Make validateWinterScores available globally
+window.validateWinterScores = validateWinterScores;
+
+export function cancelWinterScoring() {
+    // Clear any active buttons
+    document.querySelectorAll('.year-button').forEach(btn => btn.classList.remove('active'));
+    
+    // Hide the scoring interface
+    document.getElementById('winterYears').style.display = 'none';
+}
+
+// Make cancelWinterScoring available globally
+window.cancelWinterScoring = cancelWinterScoring;
 
 export function recordWinterScores(year) {
     const nations = ['france', 'prussia', 'austria', 'pragmatic'];
@@ -171,20 +216,20 @@ export function viewFinalScores() {
         .map(([nation, _]) => nation);
 
     // Create table HTML
-    let tableHtml = '<div style="padding: 20px;">';
+    let tableHtml = '<div class="scores-summary">';
     
     // Add title
-    tableHtml += '<h2 style="margin-bottom: 20px;">Winter Scoring Summary</h2>';
+    tableHtml += '<h2>Winter Scoring Summary</h2>';
     
     // Create the table
     tableHtml += `
-        <table style="border-collapse: collapse; width: 100%; margin-bottom: 20px;">
+        <table class="scores-table">
             <tr>
-                <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left;">Nation</th>
+                <th>Nation</th>
                 ${WINTER_YEARS.map(year => 
-                    `<th style="border: 1px solid #dee2e6; padding: 8px; text-align: center;">${year}</th>`
+                    `<th>${year}</th>`
                 ).join('')}
-                <th style="border: 1px solid #dee2e6; padding: 8px; text-align: center;">Total</th>
+                <th>Total</th>
             </tr>
     `;
 
@@ -195,18 +240,12 @@ export function viewFinalScores() {
         const displayName = nationName === 'Pragmatic' ? 'Pragmatic Army' : nationName;
         
         tableHtml += `
-            <tr style="${isWinner ? 'background: #e8f5e9;' : ''}">
-                <td style="border: 1px solid #dee2e6; padding: 8px; font-weight: ${isWinner ? 'bold' : 'normal'};">
-                    ${displayName}
-                </td>
+            <tr${isWinner ? ' class="winner"' : ''}>
+                <td>${displayName}</td>
                 ${WINTER_YEARS.map(year => 
-                    `<td style="border: 1px solid #dee2e6; padding: 8px; text-align: center;">
-                        ${winterScores[year]?.[nation] || '-'}
-                    </td>`
+                    `<td>${winterScores[year]?.[nation] || '-'}</td>`
                 ).join('')}
-                <td style="border: 1px solid #dee2e6; padding: 8px; text-align: center; font-weight: ${isWinner ? 'bold' : 'normal'};">
-                    ${totals[nation]}
-                </td>
+                <td>${totals[nation]}</td>
             </tr>
         `;
     });
@@ -225,7 +264,7 @@ export function viewFinalScores() {
             : `${winnerNames[0]} wins`;
             
         tableHtml += `
-            <div style="font-weight: bold; color: #2e7d32; margin-top: 10px;">
+            <div class="winner-announcement">
                 ${winnerText} with ${winningTotal} points!
             </div>
         `;
@@ -235,37 +274,9 @@ export function viewFinalScores() {
 
     // Create a modal dialog for the table
     const modalHtml = `
-        <div id="scoresModal" style="
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        ">
-            <div style="
-                background: white;
-                padding: 20px;
-                border-radius: 8px;
-                max-width: 800px;
-                width: 90%;
-                max-height: 90vh;
-                overflow-y: auto;
-                position: relative;
-            ">
-                <button onclick="document.getElementById('scoresModal').remove()" style="
-                    position: absolute;
-                    top: 10px;
-                    right: 10px;
-                    border: none;
-                    background: none;
-                    cursor: pointer;
-                    padding: 5px 10px;
-                ">Close</button>
+        <div id="scoresModal" class="scores-modal">
+            <div class="scores-modal-content">
+                <button onclick="document.getElementById('scoresModal').remove()" class="scores-modal-close">Close</button>
                 ${tableHtml}
             </div>
         </div>
