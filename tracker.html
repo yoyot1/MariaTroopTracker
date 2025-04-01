@@ -59,10 +59,16 @@
         // Store generals and their troop counts
         let generalsData = JSON.parse(localStorage.getItem('generalsData')) || {};
         
+        // Store the initial state for comparison
+        let initialGeneralsData = {};
+        
         // Initialize all nations with their generals
         Object.entries(nationGenerals).forEach(([nation, generals]) => {
             if (!generalsData[nation]) {
                 generalsData[nation] = {};
+            }
+            if (!initialGeneralsData[nation]) {
+                initialGeneralsData[nation] = {};
             }
             
             generals.forEach(general => {
@@ -71,11 +77,39 @@
                     // Set to 0 if no starting troops, otherwise use the starting troops
                     generalsData[nation][general.name] = general.troops || 0;
                 }
+                // Always set initial state
+                initialGeneralsData[nation][general.name] = general.troops || 0;
             });
         });
 
         // Save the initialized data
         localStorage.setItem('generalsData', JSON.stringify(generalsData));
+        localStorage.setItem('initialGeneralsData', JSON.stringify(initialGeneralsData));
+
+        // Function to check if current state matches initial state
+        function isInitialState() {
+            const currentData = JSON.parse(localStorage.getItem('generalsData')) || {};
+            const initialData = JSON.parse(localStorage.getItem('initialGeneralsData')) || {};
+            
+            for (const nation in initialData) {
+                for (const general in initialData[nation]) {
+                    if (currentData[nation]?.[general] !== initialData[nation][general]) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // Function to update setup mode button visibility
+        function updateSetupButtonVisibility() {
+            const setupButton = document.getElementById('setupModeButton');
+            if (isSetupMode || isInitialState()) {
+                setupButton.style.display = '';
+            } else {
+                setupButton.style.display = 'none';
+            }
+        }
 
         // Initialize the page
         function initializePage() {
@@ -100,12 +134,12 @@
                 (mainNation === 'prussia' && saxonySwitched) || 
                 (mainNation === 'austria' && !saxonySwitched);
 
-            // Show/hide setup mode button based on completion state
-            const setupButton = document.getElementById('setupModeButton');
-            setupButton.style.display = setupModeCompleted ? 'none' : 'block';
+            // Show/hide setup mode button based on state
+            updateSetupButtonVisibility();
             
             // Update setup button state if in setup mode
             if (isSetupMode) {
+                const setupButton = document.getElementById('setupModeButton');
                 setupButton.textContent = 'Exit Setup Mode';
                 setupButton.classList.add('active');
                 document.getElementById('viewBattleStrength').style.display = 'none';
@@ -331,6 +365,9 @@
             if (!isSetupMode) {
                 document.getElementById('viewBattleStrength').disabled = selectedGenerals.length === 0;
             }
+
+            // Update setup button visibility
+            updateSetupButtonVisibility();
         }
 
         function updateTroopDisplay(nation, general, count) {
@@ -528,7 +565,7 @@
                 battleButton.style.display = 'none';
                 localStorage.setItem('setupMode', 'true');
                 document.body.classList.add('setup-mode');
-                initializePage(); // Reinitialize the page to show starting positions
+                initializePage();
             } else {
                 // Exit setup mode
                 exitSetupMode();
@@ -603,7 +640,8 @@
             setupModeCompleted = true;
             localStorage.setItem('setupModeCompleted', 'true');
             document.body.classList.remove('setup-mode');
-            initializePage(); // Call initializePage instead of updateAllNations
+            initializePage();
+            updateSetupButtonVisibility();
         }
 
         function updateAllNations() {
