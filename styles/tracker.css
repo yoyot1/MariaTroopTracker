@@ -571,4 +571,9 @@ button {
 
 .setup-mode .general-name {
     margin-left: 0;
+}
+
+/* Hide winter scoring in setup mode */
+.setup-mode .winter-scoring {
+    display: none;
 } 
