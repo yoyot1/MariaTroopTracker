@@ -12,7 +12,7 @@
     <div class="page-header">
         <h1>Troop Tracker</h1>
         <div class="header-buttons">
-            <button id="setupModeButton" class="setup-mode-button" onclick="toggleSetupMode()" style="display: none;">
+            <button id="setupModeButton" class="setup-mode-button" onclick="toggleSetup()" style="display: none;">
                 Enter Setup Mode
             </button>
             <button id="viewBattleStrength" class="battle-strength-button" onclick="viewBattleStrength()" disabled>
@@ -122,7 +122,7 @@
             // Clear the container
             nationsContainer.innerHTML = '';
 
-            const nations = nationGroups[mainNation].filter(nation => {
+            const filteredNations = nationGroups[mainNation].filter(nation => {
                 // Only filter out Saxony if we're Prussia and it's switched to Austria
                 if (nation === 'Saxony') {
                     return !(mainNation === 'prussia' && saxonySwitched);
@@ -146,7 +146,7 @@
             }
 
             // Create all nation sections and their content
-            nations.forEach(nation => {
+            filteredNations.forEach(nation => {
                 const nationId = getNationId(nation);
                 const nationSection = document.createElement('div');
                 nationSection.className = 'nation-section nation-' + nationId;
@@ -177,10 +177,6 @@
                             const isDisabled = isSetupMode && (nation === 'Bavaria' || nation === 'Saxony');
                             const isDecrementDisabled = isDisabled;
                             
-                            // Debug logging
-                            // console.log('General:', general.name, 'Starting Position:', general.startingPosition, 'Setup Mode:', isSetupMode);
-                            // console.log('Current Count:', currentCount, 'Is Disabled:', isDisabled, 'Is Decrement Disabled:', isDecrementDisabled);
-                            
                             return `
                                 <div class="general ${isEliminated ? 'eliminated' : ''}" data-general="${general.name}" data-nation="${nation}" data-rank="${general.rank}">
                                     ${!isSetupMode ? `
@@ -207,11 +203,23 @@
                             `;
                         }).join('')}
                     </div>
+                `;
+
+                const setupInfoContent = `
                     <div class="setup-info">
-                        <h3>Supply Trains</h3>
                         <div class="supply-trains">
-                            <div class="supply-train-item">Starting position: [Placeholder]</div>
-                            <div class="supply-train-item">Starting position: [Placeholder]</div>
+                            ${(() => {
+                                const nationData = nations[nation];
+                                if (!nationData?.supplyTrains) return '';
+                                const supplyTrains = nationData.supplyTrains;
+                                const isPlural = supplyTrains.length > 1;
+                                return `
+                                    <div class="supply-train-item">
+                                        <span class="supply-train-label">Supply train starting position${isPlural ? 's' : ''}:</span>
+                                        <span class="supply-train-positions">${supplyTrains.join(', ')}</span>
+                                    </div>
+                                `;
+                            })()}
                         </div>
                         <div class="cards-info">
                             <div class="cards-info-item">
@@ -226,7 +234,7 @@
                     </div>
                 `;
 
-                nationSection.innerHTML = headerContent + generalsContent;
+                nationSection.innerHTML = headerContent + generalsContent + setupInfoContent;
                 nationsContainer.appendChild(nationSection);
             });
 
@@ -253,10 +261,6 @@
                             const isEliminated = !isSetupMode && currentCount === 0;
                             const isDisabled = isSetupMode && (nation === 'Bavaria' || nation === 'Saxony');
                             const isDecrementDisabled = isDisabled;
-                            
-                            // Debug logging
-                            // console.log('Saxony General:', general.name, 'Starting Position:', general.startingPosition, 'Setup Mode:', isSetupMode);
-                            // console.log('Current Count:', currentCount, 'Is Disabled:', isDisabled, 'Is Decrement Disabled:', isDecrementDisabled);
                             
                             return `
                                 <div class="general ${isEliminated ? 'eliminated' : ''}" data-general="${general.name}" data-nation="Saxony" data-rank="${general.rank}">
@@ -291,7 +295,7 @@
             }
 
             // Update all nation totals
-            nations.forEach(nation => {
+            filteredNations.forEach(nation => {
                 updateNationTotal(nation);
             });
             if (mainNation === 'austria' && saxonySwitched) {
@@ -570,7 +574,7 @@
         }
 
         // Setup mode functionality
-        function toggleSetupMode() {
+        function toggleSetup() {
             const setupButton = document.getElementById('setupModeButton');
             const battleButton = document.getElementById('viewBattleStrength');
             
@@ -680,7 +684,7 @@
         }
 
         // Make functions available globally
-        window.toggleSetupMode = toggleSetupMode;
+        window.toggleSetup = toggleSetup;
         window.exitSetupMode = exitSetupMode;
         window.updateTroops = updateTroops;
         window.handleGeneralSelection = handleGeneralSelection;

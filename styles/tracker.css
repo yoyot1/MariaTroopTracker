@@ -707,10 +707,22 @@ button {
 }
 
 .supply-train-item {
-    padding: 4px 0;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+.supply-train-label {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.supply-train-positions {
+    font-size: 1.2em;
     color: #666;
-    font-family: monospace;
-    font-size: 0.9em;
+    margin-left: 0;
 }
 
 .cards-info {
