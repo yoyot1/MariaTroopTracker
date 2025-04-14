@@ -207,29 +207,25 @@
 
                 const setupInfoContent = `
                     <div class="setup-info">
-                        <div class="supply-trains">
-                            ${(() => {
+                        <div class="info-item">
+                            <span class="info-label">Supply train${(() => {
                                 const nationData = nations[nation];
                                 if (!nationData?.supplyTrains) return '';
-                                const supplyTrains = nationData.supplyTrains;
-                                const isPlural = supplyTrains.length > 1;
-                                return `
-                                    <div class="supply-train-item">
-                                        <span class="supply-train-label">Supply train starting position${isPlural ? 's' : ''}:</span>
-                                        <span class="supply-train-positions">${supplyTrains.join(', ')}</span>
-                                    </div>
-                                `;
-                            })()}
+                                return nationData.supplyTrains.length > 1 ? 's' : '';
+                            })()}:</span>
+                            <span class="info-value">${(() => {
+                                const nationData = nations[nation];
+                                if (!nationData?.supplyTrains) return '';
+                                return nationData.supplyTrains.join(', ');
+                            })()}</span>
                         </div>
-                        <div class="cards-info">
-                            <div class="cards-info-item">
-                                <span class="cards-info-label">Starting Cards:</span>
-                                <span>[X]</span>
-                            </div>
-                            <div class="cards-info-item">
-                                <span class="cards-info-label">Initial Draw:</span>
-                                <span>[Y]</span>
-                            </div>
+                        <div class="info-item">
+                            <span class="info-label">Starting Cards:</span>
+                            <span class="info-value">${nations[nation]?.startingCards || '0'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Card Draw:</span>
+                            <span class="info-value">${nations[nation]?.cardDraw || '0'}</span>
                         </div>
                     </div>
                 `;

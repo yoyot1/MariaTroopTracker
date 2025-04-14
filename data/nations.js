@@ -1,11 +1,11 @@
 // Nation definitions with their IDs and properties
 export const nations = {
-    'France': { id: 'france', imageName: 'france', setupModeLimit: 26, supplyTrains: ['B4', 'G4'] },
-    'Bavaria': { id: 'bavaria', imageName: 'bavaria', supplyTrains: ['G4'] },
-    'Austria': { id: 'austria', imageName: 'austria', setupModeLimit: 28, supplyTrains: ['C8', 'K1', 'K6'] },
-    'Prussia': { id: 'prussia', imageName: 'prussia', setupModeLimit: 22, supplyTrains: ['K10', 'A11'] },
-    'Pragmatic Army': { id: 'pragmatic', imageName: 'pragmatic', setupModeLimit: 14, supplyTrains: ['C9'] },
-    'Saxony': { id: 'saxony', imageName: 'saxony', supplyTrains: ['H8'] }
+    'France': { id: 'france', imageName: 'france', setupModeLimit: 26, supplyTrains: ['B4', 'G4'], startingCards: 2, cardDraw: '4(5)' },
+    'Bavaria': { id: 'bavaria', imageName: 'bavaria', supplyTrains: ['G4'], startingCards: 5, cardDraw: '2(1)' },
+    'Austria': { id: 'austria', imageName: 'austria', setupModeLimit: 28, supplyTrains: ['C8', 'K1', 'K6'], startingCards: 5, cardDraw: '5' },
+    'Prussia': { id: 'prussia', imageName: 'prussia', setupModeLimit: 22, supplyTrains: ['K10', 'A11'], startingCards: 9, cardDraw: '3' },
+    'Pragmatic Army': { id: 'pragmatic', imageName: 'pragmatic', setupModeLimit: 14, supplyTrains: ['C9'], startingCards: 3, cardDraw: '3' },
+    'Saxony': { id: 'saxony', imageName: 'saxony', supplyTrains: ['H8'], startingCards: 3, cardDraw: '1' }
 };
 
 // Related nations for each main selection
