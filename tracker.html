@@ -319,13 +319,11 @@
             if (isSetupMode) {
                 // Bavaria and Saxony cannot be changed in setup mode
                 if (nation === 'Bavaria' || nation === 'Saxony') {
-                    alert(`${nation} cannot be modified during setup mode`);
                     return;
                 }
 
                 // Cannot decrease below starting troops in setup mode
                 if (change < 0 && currentCount <= startingTroops) {
-                    alert(`Cannot decrease troops below starting value of ${startingTroops} during setup mode`);
                     return;
                 }
                 
@@ -334,7 +332,6 @@
                 const nationTotal = Object.values(generalsData[nation] || {}).reduce((sum, count) => sum + count, 0);
                 
                 if (change > 0 && nationTotal + change > setupLimit) {
-                    alert(`Cannot exceed ${setupLimit} total troops for ${nation} in setup mode`);
                     return;
                 }
             } else {
@@ -349,6 +346,10 @@
             
             // Update the display
             countElement.textContent = newCount;
+            
+            // Update button disabled state
+            const decrementButton = generalElement.querySelector('.troop-controls button:first-child');
+            decrementButton.disabled = newCount <= 0 || (isSetupMode && newCount <= startingTroops);
             
             // Update eliminated status and checkbox if not in setup mode
             if (!isSetupMode) {
