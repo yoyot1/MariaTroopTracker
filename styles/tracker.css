@@ -768,4 +768,9 @@ button {
 
 .info-value {
     color: #666;
+}
+
+/* Setup mode visibility */
+.setup-mode .setup-mode-hidden {
+    display: none;
 } 

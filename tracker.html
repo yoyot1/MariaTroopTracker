@@ -158,11 +158,11 @@
                             ${nation}
                         </div>
                         ${(nation === 'Austria' || nation === 'Prussia') && shouldShowAddButton ? 
-                            `<button class="add-saxony" onclick="addSaxonyToNation('${nation}')">
+                            `<button class="add-saxony setup-mode-hidden" onclick="addSaxonyToNation('${nation}')">
                                 Add Saxony
                             </button>` : ''}
                         ${nation === 'Saxony' ? 
-                            `<button class="saxony-control" onclick="removeSaxony()">
+                            `<button class="saxony-control setup-mode-hidden" onclick="removeSaxony()">
                                 Remove Saxony
                             </button>` : ''}
                     </h2>
@@ -245,7 +245,7 @@
                             <img src="images/role_saxony.2x.png" alt="Saxony" class="nation-icon">
                             Saxony
                         </div>
-                        <button class="saxony-control" onclick="removeSaxony()">Remove Saxony</button>
+                        <button class="saxony-control setup-mode-hidden" onclick="removeSaxony()">Remove Saxony</button>
                     </h2>
                     <div class="troop-total">Total Troops: <span class="troop-total-number" id="total_Saxony">0</span></div>
                 `;
