@@ -1,11 +1,11 @@
 // Nation definitions with their IDs and properties
 export const nations = {
-    'France': { id: 'france', imageName: 'france', setupModeLimit: 26 },
-    'Bavaria': { id: 'bavaria', imageName: 'bavaria' },
-    'Austria': { id: 'austria', imageName: 'austria', setupModeLimit: 28 },
-    'Prussia': { id: 'prussia', imageName: 'prussia', setupModeLimit: 22 },
-    'Pragmatic Army': { id: 'pragmatic', imageName: 'pragmatic', setupModeLimit: 14 },
-    'Saxony': { id: 'saxony', imageName: 'saxony' }
+    'France': { id: 'france', imageName: 'france', setupModeLimit: 26, supplyTrains: ['B4', 'G4'] },
+    'Bavaria': { id: 'bavaria', imageName: 'bavaria', supplyTrains: ['G4'] },
+    'Austria': { id: 'austria', imageName: 'austria', setupModeLimit: 28, supplyTrains: ['C8', 'K1', 'K6'] },
+    'Prussia': { id: 'prussia', imageName: 'prussia', setupModeLimit: 22, supplyTrains: ['K10', 'A11'] },
+    'Pragmatic Army': { id: 'pragmatic', imageName: 'pragmatic', setupModeLimit: 14, supplyTrains: ['C9'] },
+    'Saxony': { id: 'saxony', imageName: 'saxony', supplyTrains: ['H8'] }
 };
 
 // Related nations for each main selection
