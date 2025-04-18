@@ -599,7 +599,7 @@ button {
 }
 
 .setup-mode .winter-scoring {
-    display: none !important;
+    display: none;
 }
 
 /* Winter scoring summary modal */

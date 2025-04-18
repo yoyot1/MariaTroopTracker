@@ -21,6 +21,7 @@
     </div>
     
     <div id="nationsContainer" class="nations-container"></div>
+    <div id="winterScoringContainer" class="winter-scoring-container"></div>
 
     <!-- Add modal dialog -->
     <div id="confirmModal" class="modal">
@@ -657,6 +658,7 @@
             setupModeCompleted = true;
             localStorage.setItem('setupModeCompleted', 'true');
             document.body.classList.remove('setup-mode');
+
             initializePage();
             updateSetupButtonVisibility();
         }
@@ -699,11 +701,11 @@
             // Clear any previous general selections
             selectedGenerals = [];
             
-            // Initialize the page
-            initializePage();
-            
             // Initialize winter scoring
             initializeWinterScoring();
+            
+            // Initialize the page
+            initializePage();
         });
     </script>
 </body>
